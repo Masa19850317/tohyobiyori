@@ -274,7 +274,7 @@ function home(){
   return `<section class="hero"><div class="wrap band hgrid">
    <div><h1>今度の日曜は、<br>投票日和。</h1>
    <p>あなたのまちの選挙と候補者を、ひと目で。政策やプロフィールは候補者の陣営が自分の言葉で書いています。</p>
-   <form class="zip" id="zipf"><label for="zip" class="sr">郵便番号</label><input id="zip" inputmode="numeric" placeholder="郵便番号（例 123-4567）" autocomplete="postal-code"><button class="btn">あなたの選挙をさがす</button></form></div>
+   <form class="zip" id="zipf"><label for="zip" class="sr">郵便番号</label><input id="zip" inputmode="numeric" placeholder="郵便番号 または 市区町村名" autocomplete="postal-code"><button class="btn">あなたの選挙をさがす</button></form></div>
    <svg class="scene" viewBox="0 0 480 300" aria-hidden="true">
     <circle cx="330" cy="120" r="70" fill="#ffc93c"/><circle cx="330" cy="120" r="96" fill="#ffc93c" opacity=".18"/>
     <g fill="#ffffff" opacity=".9"><ellipse cx="110" cy="70" rx="46" ry="16"/><ellipse cx="140" cy="60" rx="30" ry="18"/><ellipse cx="420" cy="40" rx="34" ry="12"/></g>
@@ -438,12 +438,48 @@ function renderPrev(){
   p.innerHTML=`<div class="cand" style="border:0">${av(c)}<div><h3>${esc(c.n)}</h3><div class="kana">${esc(c.k)}</div><div class="row"><span class="tag gray">${esc(c.party)}</span><span>${c.age}歳（${c.sex}）　${c.st}</span></div><div class="row meta">${esc(c.kata)}</div></div>
    ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><span class="more" style="color:var(--sky)">この候補者の政策・活動を見る</span>`:`<div class="freeinfo"><span>基本情報を見る</span><span>運営調べ・陣営未登録</span></div>`}</div>`;
 }
+let AREA=null;
+function lookupZip(z){
+  toast('住所を調べています…');
+  const cb='zc'+Date.now();let done=false;const sc=document.createElement('script');
+  const fail=m=>{if(done)return;done=true;try{delete window[cb]}catch(e){}sc.remove();toast(m);};
+  window[cb]=r=>{if(done)return;done=true;sc.remove();
+    const a=r&&r.results&&r.results[0];if(!a){toast('その郵便番号は見つかりませんでした');return;}
+    AREA={zip:z,pref:a.address1,city:a.address2,town:a.address3};try{localStorage.setItem('tb_zip',z)}catch(e){}
+    location.hash==='#area'?route():location.hash='area';};
+  sc.src='https://zipcloud.ibsnet.co.jp/api/search?zipcode='+z+'&callback='+cb;sc.onerror=()=>fail('住所を調べられませんでした。市区町村名を入力して探してください');
+  setTimeout(()=>fail('住所を調べられませんでした。市区町村名を入力して探してください'),8000);document.head.appendChild(sc);
+}
+const muniOf=c=>{c=c.replace(/^.+?郡/,'');const m=c.match(/^(.+?市)(.+区)$/);return m?m[1]:c;};
+function area(){
+  if(!AREA)return home();
+  const {zip,pref,city,town}=AREA,mu=muniOf(city);
+  const up=E.filter(e=>!e.smp&&!e.done&&days(e.date)>=0);
+  const hits=[];
+  up.forEach(e=>{
+    const p=e.pref.split(' ');
+    if(p[0]===pref&&(!p[1]||p[1]===mu)){
+      let dn='';const ds=distOf(e);
+      if(ds&&ds.length>1){const d=ds.find(d=>d.a.split('、').some(x=>x===mu||x===city));if(d)dn=d.n+'選挙区（定数'+d.s+'）';}
+      hits.push({e,dn});
+    }else if(e.pref==='全国'&&e.id==='touitsu-late'){hits.push({e,dn:'あなたの市区町村も対象かは、市区町村の選挙管理委員会で確認できます'});}
+  });
+  hits.sort((a,b)=>a.e.date.localeCompare(b.e.date));
+  const near=hits.filter(h=>h.e.pref!=='全国');
+  return `<div class="wrap band"><div class="crumb"><a href="#home">トップ</a> ＞ あなたの選挙</div>
+  <h1 style="font-size:clamp(26px,4vw,38px);margin-top:8px">${esc(pref)}${esc(city)}の選挙</h1>
+  <p class="meta">〒${zip.slice(0,3)}-${zip.slice(3)}　${esc(pref+city+(town||''))}</p>
+  ${near.length?`<div class="count"><b>${near.length}</b><div><strong>2027年末までに予定されている選挙</strong><br><span class="meta">あなたの住所で投票できる選挙です（県の選挙と${esc(mu)}の選挙）。</span></div></div>`:`<div class="notice"><strong>${esc(pref+mu)}で、2027年末までに予定されている選挙は今のところ掲載されていません。</strong><br>日程が決まりしだい、毎日の更新で追加します。<a href="#search" data-q="${esc(pref)}">${esc(pref)}のほかの選挙を見る</a></div>`}
+  <div style="display:grid;gap:12px">${hits.map(h=>`<div>${ecard(h.e)}${h.dn?`<p class="meta" style="margin:6px 4px 0">${h.e.pref==='全国'?'':'あなたの選挙区：'}${esc(h.dn)}</p>`:''}</div>`).join('')}</div>
+  ${ad()}
+  <p class="src">住所の判定：郵便番号検索API（zipcloud）。選挙区は市区町村単位で判定しています。政令市の区や一部の地域で選挙区が分かれる場合は、選挙管理委員会の案内をご確認ください。</p></div>`;
+}
 function route(){
   const h=location.hash.slice(1)||'home',app=$('#app');
   const e=E.find(x=>x.id===h);
-  app.innerHTML=h==='plans'?plans():h==='edit'?edit():h==='search'?search():e?election(e):C[h]?cand(h):home();
+  app.innerHTML=h==='plans'?plans():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
   document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(['plans','edit','search'].includes(h)?h:'home')));
-  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':'投票日和')+'｜投票日和';
+  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
   if(h==='edit')renderPrev();
   window.scrollTo(0,0);closeD();
 }
@@ -460,7 +496,8 @@ document.addEventListener('click',ev=>{
 });
 document.addEventListener('input',ev=>{if(ev.target.closest('#ef'))renderPrev();});
 document.addEventListener('submit',ev=>{ev.preventDefault();
-  if(ev.target.id==='zipf'){const v=$('#zip').value.replace(/\D/g,'');if(v.length!==7){toast('郵便番号を7桁で入力してください');return;}toast('郵便番号から地域を判定する機能は次の段階で実装します。サンプルの選挙を表示します');location.hash='e2';}
+  if(ev.target.id==='zipf'){const raw=$('#zip').value.trim();const v=raw.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,'');
+    if(v.length===7){lookupZip(v);}else if(raw&&!/^[\d０-９\-ー－\s]+$/.test(raw)){q=raw;qt='';location.hash==='#search'?route():location.hash='search';}else{toast('郵便番号を7桁で入力してください（市区町村名でも探せます）');}}
   else if(ev.target.id==='sf'){q=$('#sq').value;route();}
   else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('登録しました（プロトタイプのため実際には登録されません）');}
   else toast('保存しました（プロトタイプのため実際には保存されません）');
