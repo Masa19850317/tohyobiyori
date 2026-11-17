@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>投票日和｜あなたのまちの選挙と候補者</title>
+<meta name="description" content="全国の選挙日程・選挙区・定数・候補者をまとめた選挙情報サイト（プロトタイプ）">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: friendly civic guide, clear and fair, like a good local newspaper on a sunny morning
+   IDEA: a weather forecast for voting day — "today is a fine day to vote"
+   PICTURE: sun rising over a town with a ballot box; countdown to the vote like a forecast
+   COLOUR and TYPE: deep sky blue dominant, sun yellow support, coral accent; Zen Maru Gothic + Noto Sans JP
+   LAYOUT: sticky header, hero band, card lists, candidate pages in one calm column */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0e1626);--ink:light-dark(#14213a,#eef2fa);--sub:light-dark(#56627a,#a9b4c9);
+--sky:light-dark(#1d5fd0,#3d7ef0);--skyd:light-dark(#0f3f94,#1b3f86);--sun:#ffc93c;--coral:light-dark(#e2553a,#ff7a5c);
+--line:light-dark(#dde3ee,#26324a);--soft:light-dark(#eef4ff,#152240);--card:light-dark(#fff,#121d33)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 "Noto Sans JP",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.logo{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;line-height:1.2;text-wrap:balance;margin:0}
+a{color:var(--sky)}
+button,input,textarea,select{font:inherit;font-size:16px}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+html{scroll-padding-top:72px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 max(4vw,16px)}
+.band{padding:clamp(28px,4vw,56px) 0}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px;color:var(--ink);text-decoration:none}
+.logo small{font-size:11px;font-weight:700;color:var(--sub)}
+.hd nav{margin-left:auto;display:flex;gap:4px}
+.hd nav a{padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:700}
+.hd nav a.on,.hd nav a:hover{background:var(--soft)}
+.hero{background:var(--sky);color:#fff;overflow:hidden}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:center}
+.hero h1{font-size:clamp(32px,5vw,50px);font-weight:900}
+.hero p{color:#e3ecff;max-width:30em}
+.zip{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.zip input{flex:1 1 180px;min-height:48px;border-radius:12px;border:0;padding:0 16px;color:#14213a;background:#fff}
+.btn{min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--sun);color:#14213a;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;gap:6px}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.blue{background:var(--sky);color:#fff}
+.scene{width:100%;height:auto;display:block}
+.fc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:-36px;position:relative}
+.fc div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 6px 20px #0f3f9414}
+.fc b{display:block;font:900 30px/1.1 "Zen Maru Gothic",sans-serif;color:var(--sky)}
+.fc span{font-size:13px;color:var(--sub)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.sec-h h2{font-size:26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.ecard{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .15s}
+.ecard:hover{transform:translateY(-2px);border-color:var(--sky)}
+.ecard h3{font-size:19px;margin:6px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--sky);white-space:nowrap}
+.tag.hot{background:var(--coral);color:#fff}
+.tag.gray{background:light-dark(#5b6170,#3a4459);color:#fff}
+.meta{font-size:14px;color:var(--sub)}
+.ad{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--sub);font-size:13px;background:light-dark(#fafbfd,#101a2e);margin:16px 0}
+.ad b{display:block;font-size:11px;letter-spacing:0;color:var(--sub)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.steps div{background:var(--soft);border-radius:16px;padding:18px}
+.steps h3{font-size:18px;margin-bottom:6px}
+.cta{background:var(--skyd);color:#fff;border-radius:20px;padding:clamp(20px,4vw,36px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta p{color:#d7e3ff;margin:6px 0 0}
+.crumb{font-size:13px;color:var(--sub);padding-top:16px}
+.crumb a{color:var(--sub)}
+.ehead{border-bottom:4px solid var(--sky);padding:16px 0 20px}
+.ehead h1{font-size:clamp(26px,4vw,38px);margin:8px 0}
+.kv{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px}
+.kv b{color:var(--sub);font-weight:500;margin-right:6px}
+.count{display:flex;align-items:center;gap:14px;background:var(--soft);border-radius:16px;padding:14px 18px;margin:16px 0}
+.count b{font:900 40px/1 "Zen Maru Gothic";color:var(--coral)}
+.cand{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
+.av{width:110px;height:132px;border-radius:12px;display:block}
+.cand h3{font-size:24px}
+.kana{font-size:13px;color:var(--sub)}
+.row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:6px;font-size:15px}
+.votes{font-weight:700;margin-left:auto;font-size:18px;white-space:nowrap}
+.bub{grid-column:1/-1;position:relative;background:var(--sky);color:#fff;font:700 18px/1.5 "Zen Maru Gothic",sans-serif;padding:14px 18px;border-radius:14px;margin-top:6px}
+.bub::before{content:"";position:absolute;top:-10px;left:44px;border:10px solid transparent;border-top:0;border-bottom-color:var(--sky)}
+.more{grid-column:1/-1;text-align:center;font-weight:700}
+.freeinfo{grid-column:1/-1;font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.src{font-size:12px;color:var(--sub);margin-top:16px}
+.prof{max-width:760px;margin:0 auto}
+.ptop{text-align:center;padding:24px 0 8px}
+.ptop h1{font-size:clamp(30px,5vw,44px)}
+.ptop .av{width:180px;height:216px;margin:16px auto}
+.ptop .bub{text-align:left;font-size:20px}
+table{border-collapse:collapse;width:100%}
+.info td,.info th{border-bottom:1px solid var(--line);padding:14px 8px;text-align:left;vertical-align:top}
+.info th{width:7em;color:var(--sub);font-weight:500}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:20px 0}
+.menu button{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;text-align:left;padding:0 14px}
+.menu button:disabled{opacity:.45;cursor:default}
+.ps{margin-top:28px}
+.ps>h2{background:var(--sky);color:#fff;padding:14px 18px;border-radius:14px;font-size:22px}
+.ps h3{font-size:17px;border-left:5px solid var(--sun);padding-left:10px;margin:20px 0 8px}
+.ps p{margin:6px 0}
+.ps ul{padding-left:1.2em;margin:6px 0}
+.hist a{font-weight:700}
+.hist td{padding:12px 4px;border-bottom:1px solid var(--line)}
+.hist td:last-child{text-align:right;white-space:nowrap}
+.win{color:var(--coral);font-weight:700}
+.sns{display:flex;gap:10px;flex-wrap:wrap}
+.sns span{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700}
+.video{aspect-ratio:16/9;border-radius:14px;background:linear-gradient(135deg,var(--skyd),var(--sky));display:grid;place-items:center;color:#fff;font-weight:700}
+.notice{background:light-dark(#fff8e1,#2a2410);border:1px solid light-dark(#f1d27a,#6b5a20);border-radius:14px;padding:16px;margin:20px 0;font-size:14px}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.plan{border:2px solid var(--line);border-radius:20px;padding:22px;background:var(--card)}
+.plan.rec{border-color:var(--sky);box-shadow:0 10px 30px #1d5fd022}
+.plan h3{font-size:22px}
+.price{font:900 34px/1.1 "Zen Maru Gothic";margin:10px 0 2px;white-space:nowrap}
+.price small{font-size:14px;font-weight:500;color:var(--sub)}
+.plan ul{padding-left:1.1em;font-size:14px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:10px 8px;font-size:14px}
+.cmp td{text-align:center}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.ok{color:var(--sky);font-weight:900}
+.edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.fld{margin-bottom:16px}
+.fld label{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.fld input,.fld textarea,.fld select{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 12px}
+.fld textarea{min-height:110px}
+.lock{font-size:12px;color:var(--coral);font-weight:700;margin-left:6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
+.seg button.on{background:var(--sky);color:#fff;border-color:var(--sky)}
+.pv{position:sticky;top:76px;border:1px solid var(--line);border-radius:16px;padding:0 16px;background:var(--card)}
+.ic{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--ink);padding:0}
+.ic:hover{background:var(--soft)}
+#drawer{position:fixed;inset:60px 0 0 auto;width:min(320px,100%);background:var(--card);border-left:1px solid var(--line);z-index:6;box-shadow:-10px 0 30px #0002;overflow:auto}
+.dr-in a{display:block;padding:16px 20px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700}
+.dr-in a:hover{background:var(--soft)}
+.cal-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cal-tabs button,.chips button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
+.cal-tabs button.on,.chips button.on{background:var(--sky);border-color:var(--sky);color:#fff}
+.cal a{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.cal a:hover{background:var(--soft)}
+.cal .dt{font:900 26px/1 "Zen Maru Gothic";color:var(--sky);text-align:center;white-space:nowrap}
+.cal .dt small{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-top:4px}
+.cal strong{display:block;font-size:17px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start}
+.reg{display:grid;gap:14px}
+.reg h3{font-size:15px;color:var(--sub);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:40px;padding:0 14px;font-size:14px}
+.chips button.smp{border-color:var(--sun);background:light-dark(#fff6d8,#2a2410)}
+.news{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.art{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-align:left;padding:0;color:var(--ink);cursor:pointer}
+.art svg{display:block;width:100%;height:auto}
+.art div{padding:12px 14px 16px}
+.art h3{font-size:16px;margin:6px 0}
+.upd{list-style:none;padding:0;margin:0}
+.upd a{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.upd .av{width:48px;height:58px;border-radius:8px}
+.upd b{display:block}
+.join{background:var(--sun);border-radius:20px;padding:clamp(20px,4vw,36px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:center;color:#14213a}
+.join h2{font-size:26px}
+.join form{display:grid;gap:8px}
+.join input{min-height:48px;border-radius:12px;border:0;padding:0 14px;background:#fff;color:#14213a}
+.join .btn{background:#14213a;color:#fff}
+.sr{position:absolute;left:-9999px}
+.res-h{font-size:18px;margin:24px 0 8px}
+.cand .av{flex:none}
+#app [id^=d-] .av{width:56px;height:67px;border-radius:8px}
+.lnk{background:none;border:0;padding:0;color:var(--sky);font-weight:700;text-decoration:underline;cursor:pointer;text-align:left}
+.dtab td:nth-child(3){text-align:center}.dtab td:nth-child(2){text-align:left}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+footer{background:var(--skyd);color:#d7e3ff;margin-top:48px;font-size:14px}
+footer a{color:#fff}
+.demo{font-size:12px;color:var(--sub);text-align:center;padding:8px}
+@media(max-width:760px){.hgrid,.edit,.plans,.two,.join{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:minmax(0,1fr)}.pv{position:static}.hd nav a.opt{display:none}}
+@media(max-width:600px){.fc{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px}.fc b{font-size:22px}.fc div{padding:12px}.cand{grid-template-columns:84px minmax(0,1fr)}.av{width:84px;height:100px}.cand h3{font-size:20px}.votes{margin-left:0}.logo small{display:none}.cmp{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.ecard,.toast{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap hd">
+  <a class="logo" href="#home"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="13" r="7" fill="#ffc93c"/><g stroke="#ffc93c" stroke-width="2.4" stroke-linecap="round"><path d="M15 1v3M3 13h3M24 13h3M6.5 4.5l2 2M23.5 4.5l-2 2"/></g><rect x="5" y="18" width="20" height="11" rx="2" fill="#1d5fd0"/><rect x="11" y="19.5" width="8" height="2" rx="1" fill="#fff"/></svg>投票日和<small>とうひょうびより</small></a>
+  <nav><a href="#home" data-n="home" class="opt">選挙をさがす</a><a href="#plans" data-n="plans" class="opt">陣営の方へ</a>
+   <a href="#search" data-n="search" class="ic" aria-label="検索"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></a>
+   <button class="ic" id="mbtn" aria-label="メニュー" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></nav>
+</div></header>
+<div id="drawer" hidden><div class="dr-in">
+ <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="news">選挙ニュース</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
+</div></div>
+<div class="demo">プロトタイプ：選挙日程は<span id="upd">2026年11月17日</span>時点で公表・報道されている実際の予定です（2027年分は見込みを含みます）。候補者と「あおば県」の選挙は架空のサンプルです</div>
+<main id="app"></main>
+<footer><div class="wrap band">
+  <div class="logo" style="color:#fff">投票日和</div>
+  <p>掲載情報は、各選挙管理委員会の告示・開票結果、官報、候補者陣営の登録内容などをもとに作成しています。各項目に出典と「陣営確認済み／運営調べ」を表示します。</p>
+  <p><a href="#plans">陣営の方へ（掲載プラン）</a>　<a href="#edit">陣営ログイン</a>　<a href="#home">選挙をさがす</a></p>
+</div></footer>
+<div class="toast" id="toast"></div>
+<script src="data.js"></script>
+<script>
+{
+const P={free:'フリー',std:'スタンダード',pre:'プレミアム'};
+const E=[
+ {id:'e2',name:'あおば県議会議員選挙',dist:'みなみ野市選挙区',pref:'あおば県',date:'2026-12-13',kokuji:'2026-12-04',seats:2,src:'あおば県選挙管理委員会 告示（2026/12/4予定）',cands:['c1','c2','c3','c4']},
+ {id:'e1',name:'みなみ野市長選挙',dist:'',pref:'あおば県 みなみ野市',date:'2026-12-13',kokuji:'2026-12-06',seats:1,src:'みなみ野市選挙管理委員会 告示（2026/12/6予定）',cands:['c5','c6']},
+ {id:'e3',name:'さくら台町議会議員選挙',dist:'',pref:'あおば県 さくら台町',date:'2027-01-24',kokuji:'2027-01-19',seats:12,src:'さくら台町選挙管理委員会 公表資料',cands:['c7','c8','c9'],others:11},
+ {id:'e4',name:'あおば県議会議員選挙',dist:'みなみ野市選挙区',pref:'あおば県',date:'2022-12-11',kokuji:'2022-12-02',seats:2,src:'あおば県選挙管理委員会 開票結果',done:true,cands:['c2','c1','c3'],res:{c2:15820,c1:9102,c3:13410},win:['c2','c3']}
+];
+E.forEach(e=>{e.smp=true});E[0].type='都道府県議';E[1].type='市区町村長';E[2].type='市区町村議';E[3].type='都道府県議';
+const typeOf=n=>n.includes('知事')?'知事':/[都道府県]議会/.test(n)&&!/[市町村]議会/.test(n)?'都道府県議':n.includes('議会議員')?'市区町村議':'市区町村長';
+const SRC27='選挙ナビ（senkyonavi.jp）「2027年の選挙日程」掲載情報（2026年11月17日時点）';
+let ri=0;
+(RAW+'\n'+RAW2).split('\n').forEach(l=>{const [d,k,n,p,m]=l.split('|');const ap=d.length===7;const muni=n.match(/^(.+?[市区町村])(長|議会)/);const x=EX[n]||{};
+ E.push({id:'r'+(++ri),name:n,dist:'',pref:p+(muni&&!/[都道府県]議会/.test(n.replace(/[市町村]議会/,''))?' '+muni[1]:''),date:ap?d+'-15':d,ap:ap?k.slice(1):'',mk:m==='見込み',kokuji:ap?'':(k.length>5?k:d.slice(0,5)+k),seats:x.seats||null,type:typeOf(n),cands:[],
+  src:x.src||(d<'2027'?'各選挙管理委員会の公表日程（2026年11月17日時点で確認）':n.includes('北九州')?'北九州市選挙管理委員会の決定（2026年7月21日、報道による）':SRC27),
+  note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
+E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
+ note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
+const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt]=x.split('|');return {nm,age,p,st,nt}}):null}})};
+const distTxt=e=>{const d=DIST[e.name];return d?d.list.replace(/\|\d+/g,''):''};
+
+const when=e=>e.ap?`${e.date.slice(0,4)}年${e.ap}`:fmt(e.date)+(e.mk?'（見込み）':'');
+const TYPES=['国政','知事','都道府県議','市区町村長','市区町村議'];
+const REG=[['北海道・東北','北海道 青森 岩手 宮城 秋田 山形 福島'],['関東','茨城 栃木 群馬 埼玉 千葉 東京 神奈川'],['中部','新潟 富山 石川 福井 山梨 長野 岐阜 静岡 愛知'],['近畿','三重 滋賀 京都 大阪 兵庫 奈良 和歌山'],['中国・四国','鳥取 島根 岡山 広島 山口 徳島 香川 愛媛 高知'],['九州・沖縄','福岡 佐賀 長崎 熊本 大分 宮崎 鹿児島 沖縄']];
+const NEWS=[['ガイド','期日前投票、いつ・どこで・何を持っていく？','#ffc93c','2026/11/16'],['選挙区レポート','みなみ野市長選、争点は駅前再開発の第2期','#3d7ef0','2026/11/15'],['はじめての投票','18歳になったら知っておきたい、投票の流れ','#e2553a','2026/11/12'],['比べ方','候補者の政策は「いつまでに・どれだけ」を見る','#2f9e6a','2026/11/10']];
+const UPD=[['c1','政策・メッセージを更新','2時間前'],['c5','活動実績を追加','5時間前'],['c4','キャッチコピーを設定','昨日'],['c8','プロフィールを登録','2日前']];
+let q='',qt='',calM='';
+const C={
+ c1:{n:'青山 そうた',k:'アオヤマ ソウタ',age:44,sex:'男',st:'新人',party:'無所属',kata:'NPO法人代表、元小学校教員',plan:'pre',col:'#3d7ef0',
+  copy:'子育てするなら、みなみ野で。',birth:'1982年3月8日',from:'あおば県みなみ野市',
+  career:['みなみ野市立東小学校 卒業','あおば県立北高校 卒業','国立あおば大学 教育学部 卒業','みなみ野市内の小学校で教員として12年勤務','NPO法人「放課後みなみ野」設立、代表理事'],
+  act:'教員時代に感じた「放課後の居場所が足りない」という課題から、NPO法人を立ち上げ、市内3か所で学童・学習支援を運営してきました。登録児童はのべ1,200人。地域の高校生ボランティアとともに、子どもが安心して過ごせる場所づくりを続けています。',
+  pol:[['子育て・教育',['放課後の居場所を全小学校区に','県立高校の通学バス路線の見直し','教員の事務負担を減らすICT導入']],['くらし・交通',['デマンド交通の県補助を拡充','免許返納後も通院・買い物に困らない地域交通']],['産業',['県産果物のブランド化と販路開拓','空き店舗を使った若手の開業支援']]],
+  msg:'「この町で子どもを育ててよかった」と思える県政へ。現場で見てきた課題を、県議会で一つずつ解決します。',
+  sns:['X','Instagram','YouTube','Facebook'],hist:[['e4',null]]},
+ c2:{n:'川辺 まさみ',k:'カワベ マサミ',age:58,sex:'女',st:'現職',party:'あおば未来の会',kata:'県議会議員（2期）',plan:'std',col:'#e2553a',
+  copy:'医療と福祉に、もう一歩。',birth:'1968年6月21日',from:'あおば県みなみ野市',
+  career:['あおば県立南高校 卒業','看護師として地域病院に20年勤務','2018年 あおば県議会議員 初当選','2022年 再選（2期目）'],
+  pol:[['医療・福祉',['周産期医療の広域連携を推進','訪問看護ステーションの人材確保']],['防災',['河川改修の前倒し']]],
+  msg:'看護の現場から県政へ。命と暮らしを守る政策を続けます。',sns:['X','Facebook'],hist:[['e4',null]]},
+ c3:{n:'森 けんじ',k:'モリ ケンジ',age:67,sex:'男',st:'現職',party:'無所属',kata:'県議会議員（3期）、農業',plan:'free',col:'#2f9e6a',hist:[['e4',null]]},
+ c4:{n:'橘 ゆい',k:'タチバナ ユイ',age:36,sex:'女',st:'新人',party:'無所属',kata:'会社員、子育て中',plan:'std',col:'#a35bd6',
+  copy:'働く世代の声を、県議会に。',birth:'1990年11月2日',from:'あおば県あさひ市',career:['あおば県立西高校 卒業','私立大学 経済学部 卒業','IT企業で人事・労務を担当'],
+  pol:[['働き方',['県内企業のテレワーク導入支援','男性の育休取得率向上']]],msg:'二児の母として、働きながら子育てする人の声を届けます。',sns:['Instagram','X'],hist:[]},
+ c5:{n:'野村 たかし',k:'ノムラ タカシ',age:62,sex:'男',st:'現職',party:'無所属',kata:'みなみ野市長（1期）',plan:'pre',col:'#d48a00',
+  copy:'続けて、仕上げる。みなみ野の4年。',birth:'1964年9月14日',from:'あおば県みなみ野市',career:['国立あおば大学 法学部 卒業','みなみ野市役所 入庁（企画部長を歴任）','2022年 みなみ野市長 初当選'],
+  act:'1期目では、市立病院の小児科夜間診療の再開、駅前広場の再整備、ふるさと納税の寄付額倍増に取り組みました。',
+  pol:[['まちづくり',['駅前再開発の第2期','市内循環バスの増便']],['財政',['市債残高の計画的な削減']]],msg:'始めたことを、最後までやり遂げます。',sns:['X','YouTube','Facebook'],hist:[]},
+ c6:{n:'春日 ちひろ',k:'カスガ チヒロ',age:49,sex:'女',st:'新人',party:'無所属',kata:'元市議会議員',plan:'free',col:'#1aa3a3',hist:[]},
+ c7:{n:'大森 ひでお',k:'オオモリ ヒデオ',age:71,sex:'男',st:'現職',party:'無所属',kata:'町議会議員（5期）',plan:'free',col:'#6b7a90',hist:[]},
+ c8:{n:'佐野 みく',k:'サノ ミク',age:29,sex:'女',st:'新人',party:'無所属',kata:'カフェ経営',plan:'std',col:'#e86a9a',copy:'若い人が戻ってくる町へ。',career:['さくら台町出身','都内の飲食店勤務を経てUターン'],pol:[['移住・定住',['空き家バンクの使いやすさ改善']]],msg:'町の外を見てきたからこそ、町の良さを伝えたい。',sns:['Instagram'],hist:[]},
+ c9:{n:'井口 まもる',k:'イグチ マモル',age:55,sex:'男',st:'元職',party:'さくら台みらい',kata:'農業法人役員',plan:'free',col:'#8a6d3b',hist:[]}
+};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>{const [y,m,dd]=d.split('-');return `${y}年${+m}月${+dd}日`};
+const days=d=>Math.ceil((new Date(d+'T00:00:00+09:00')-new Date())/864e5);
+const eOf=c=>E.find(e=>!e.done&&e.cands.includes(c));
+const av=(c,w=110,h=132)=>`<svg class="av" viewBox="0 0 110 132" role="img" aria-label="${esc(c.n)}の写真（サンプル）"><rect width="110" height="132" rx="12" fill="${c.col}"/><circle cx="55" cy="54" r="24" fill="#ffffff" opacity=".9"/><path d="M14 132c4-30 20-44 41-44s37 14 41 44z" fill="#ffffff" opacity=".9"/><text x="55" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="${c.col}" font-family="Zen Maru Gothic,sans-serif">${esc(c.n[0])}</text></svg>`;
+const ad=(t='バナー広告 728×90 / 320×100')=>`<div class="ad"><b>広告</b>${t}</div>`;
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400)};
+
+function ecard(e){
+  const d=days(e.date);
+  return `<a class="ecard" href="#${e.id}"><span class="tag ${!e.ap&&d<=30&&d>=0?'hot':''}">${e.done?'終了':e.ap?'時期の見込み':d>=0?`投票日まであと${d}日`:'投票日'}</span>
+  <h3>${esc(e.name)}${e.dist?`<br><small style="font-size:14px">${esc(e.dist)}</small>`:''}</h3>
+  <div class="meta">${e.smp?'<span class="tag gray">架空サンプル</span> ':''}${esc(e.pref)}｜投票日 ${when(e)}${e.count?`｜${e.count}件`:''}${e.seats?`｜定数 ${e.seats}`:''}${e.cands.length?`｜候補者 ${e.cands.length+(e.others||0)}人`:''}</div></a>`;
+}
+function home(){
+  const up=E.filter(e=>!e.done&&!e.smp&&days(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
+  const months=[...new Set(up.map(e=>e.date.slice(0,7)))];if(!months.includes(calM))calM=months[0];
+  const wk='日月火水木金土';
+  return `<section class="hero"><div class="wrap band hgrid">
+   <div><h1>今度の日曜は、<br>投票日和。</h1>
+   <p>あなたのまちの選挙と候補者を、ひと目で。政策やプロフィールは候補者の陣営が自分の言葉で書いています。</p>
+   <form class="zip" id="zipf"><label for="zip" class="sr">郵便番号</label><input id="zip" inputmode="numeric" placeholder="郵便番号（例 123-4567）" autocomplete="postal-code"><button class="btn">あなたの選挙をさがす</button></form></div>
+   <svg class="scene" viewBox="0 0 480 300" aria-hidden="true">
+    <circle cx="330" cy="120" r="70" fill="#ffc93c"/><circle cx="330" cy="120" r="96" fill="#ffc93c" opacity=".18"/>
+    <g fill="#ffffff" opacity=".9"><ellipse cx="110" cy="70" rx="46" ry="16"/><ellipse cx="140" cy="60" rx="30" ry="18"/><ellipse cx="420" cy="40" rx="34" ry="12"/></g>
+    <path d="M0 230 Q120 170 240 220 T480 200 V300 H0z" fill="#0f3f94"/>
+    <g fill="#e9f0ff"><rect x="40" y="180" width="40" height="60" rx="3"/><rect x="88" y="160" width="30" height="80" rx="3"/><rect x="380" y="170" width="44" height="70" rx="3"/><rect x="430" y="190" width="30" height="50" rx="3"/></g>
+    <g fill="#1d5fd0" opacity=".5"><rect x="48" y="190" width="8" height="8"/><rect x="64" y="190" width="8" height="8"/><rect x="96" y="172" width="6" height="8"/><rect x="390" y="182" width="8" height="8"/><rect x="406" y="182" width="8" height="8"/></g>
+    <rect x="170" y="190" width="150" height="100" rx="10" fill="#ffffff"/><rect x="170" y="190" width="150" height="22" rx="10" fill="#e2553a"/>
+    <rect x="215" y="196" width="60" height="8" rx="4" fill="#14213a"/>
+    <text x="245" y="258" text-anchor="middle" font-family="Zen Maru Gothic,sans-serif" font-weight="900" font-size="30" fill="#1d5fd0">投票</text>
+    <g transform="rotate(-8 245 170)"><rect x="222" y="132" width="46" height="62" rx="4" fill="#ffffff" stroke="#14213a" stroke-width="2"/><path d="M232 150h26M232 162h26M232 174h16" stroke="#9aa6bd" stroke-width="3" stroke-linecap="round"/></g>
+   </svg></div></section>
+  <div class="wrap"><div class="fc">
+   <div><b>${d}日</b><span>次の投票日まで（${fmt(next.date)}）</span></div>
+   <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}に投票の選挙</span></div>
+   <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの予定</span></div></div></div>
+
+  <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
+   <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
+   <div class="sec-h" style="margin-top:32px"><h2 style="font-size:20px">候補者ページの見本</h2><span class="meta">架空の選挙・候補者です</span></div>
+   <div class="grid">${E.filter(e=>e.smp&&!e.done).map(ecard).join('')}</div></section>
+
+  <section class="wrap band" style="padding-top:0"><div class="two">
+   <div id="cal"><div class="sec-h"><h2>選挙カレンダー</h2></div>
+    <div class="cal-tabs">${months.map(m=>`<button data-m="${m}" class="${m===calM?'on':''}">${m.slice(2,4)}年${+m.slice(5)}月（${up.filter(e=>e.date.startsWith(m)).length}）</button>`).join('')}</div>
+    <div class="cal">${up.filter(e=>e.date.startsWith(calM)).map(e=>{const dt=new Date(e.date+'T00:00:00+09:00');return `<a href="#${e.id}"><span class="dt">${e.ap?`${+e.date.slice(5,7)}月<small>ごろ</small>`:`${+e.date.slice(5,7)}/${+e.date.slice(8)}<small>${wk[dt.getDay()]}曜</small>`}</span><span><strong>${esc(e.name)}${e.dist?' '+esc(e.dist):''}</strong><span class="meta">${esc(e.pref)}｜${esc(e.type)}｜告示 ${e.kokuji?`${+e.kokuji.slice(5,7)}/${+e.kokuji.slice(8)}`:'未定'}${e.mk?'（見込み）':''}${e.count?`｜${e.count}件`:''}</span></span><span class="tag ${!e.ap&&days(e.date)<=30?'hot':''}">${e.ap?esc(e.ap):`あと${days(e.date)}日`}</span></a>`}).join('')}</div></div>
+   <aside><div class="sec-h"><h2 style="font-size:20px">陣営の最新更新</h2></div>
+    <ul class="upd">${UPD.map(([id,t,w])=>{const c=C[id],e=eOf(id);return `<li><a href="#${id}">${av(c)}<span><b>${esc(c.n)}</b><span class="meta">${esc(e.name)}｜${t}・${w}</span></span></a></li>`}).join('')}</ul>
+    ${ad('広告 300×250')}</aside></div></section>
+
+  <section class="wrap band" id="pref" style="padding-top:0"><div class="sec-h"><h2>地域から探す</h2></div>
+   <div class="reg"><div><h3>架空サンプル</h3><div class="chips"><button class="smp" data-q="あおば県">あおば県</button></div></div>
+   ${REG.map(([r,ps])=>`<div><h3>${r}</h3><div class="chips">${ps.split(' ').map(p=>`<button data-q="${p==='北海道'?p:p+(p==='東京'?'都':/^(京都|大阪)$/.test(p)?'府':'県')}">${p}</button>`).join('')}</div></div>`).join('')}</div>
+   <h2 style="font-size:20px;margin:28px 0 12px">選挙の種類から探す</h2>
+   <div class="chips">${TYPES.map(t=>`<button data-t="${t}">${t}</button>`).join('')}</div></section>
+
+  <section class="wrap band" id="news" style="padding-top:0"><div class="sec-h"><h2>選挙ニュース・ガイド</h2><span class="meta">サンプル記事</span></div>
+   <div class="news">${NEWS.map(([c,t,col,dt])=>`<button class="art" data-art="1"><svg viewBox="0 0 320 150" aria-hidden="true"><rect width="320" height="150" fill="${col}"/><circle cx="260" cy="40" r="60" fill="#fff" opacity=".18"/><rect x="24" y="70" width="90" height="56" rx="8" fill="#fff" opacity=".9"/><rect x="40" y="82" width="58" height="6" rx="3" fill="${col}"/><rect x="40" y="96" width="40" height="6" rx="3" fill="${col}" opacity=".6"/></svg><div><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${dt}</span></div></button>`).join('')}</div></section>
+
+  <section class="wrap band" style="padding-top:0"><div class="sec-h"><h2>投票に行く前に</h2></div><div class="steps">
+   <div><h3>期日前投票も使える</h3><p>告示日の翌日から投票日の前日まで、市役所などで投票できます。予定がある日も安心です。</p></div>
+   <div><h3>入場券を忘れても大丈夫</h3><p>多くの自治体では、名簿で本人確認ができれば投票できます。詳しくはお住まいの選挙管理委員会へ。</p></div>
+   <div><h3>候補者を見比べる</h3><p>各選挙のページで、候補者の政策・経歴・これまでの得票を並べて確認できます。</p></div></div></section>
+
+  <section class="wrap band" id="join" style="padding-top:0"><div class="join"><div><h2>郵便番号だけで、無料会員登録</h2><p>あなたの地域で選挙が決まったら、告示日と投票日をメールでお知らせします。候補者のお気に入り登録もできます。</p></div>
+   <form id="joinf"><label for="j-zip" class="sr">郵便番号</label><input id="j-zip" inputmode="numeric" placeholder="郵便番号" autocomplete="postal-code"><label for="j-mail" class="sr">メールアドレス</label><input id="j-mail" type="email" placeholder="メールアドレス" autocomplete="email"><button class="btn">無料で登録する</button></form></div></section>
+
+  <section class="wrap"><div class="cta"><div><h2 style="font-size:24px">立候補予定の陣営の方へ</h2><p>写真・キャッチコピー・政策・活動実績を、陣営自身で掲載・更新できます。基本情報の掲載は無料です。</p></div><a class="btn" href="#plans">掲載プランを見る</a></div></section>`;
+}
+function search(){
+  const k=q.trim(),hitE=E.filter(e=>!e.done&&(!k||(e.name+e.dist+e.pref+distTxt(e)).includes(k))&&(!qt||e.type===qt)).sort((a,b)=>a.date.localeCompare(b.date));
+  const hitC=k?Object.entries(C).filter(([id,c])=>(c.n+c.k+c.party+c.kata).includes(k)):[];
+  const hitR=[];if(k)E.forEach(e=>(distOf(e)||[]).forEach((d,i)=>(d.c||[]).forEach(c=>{if((c.nm+c.p).includes(k))hitR.push({e,d,c})})));
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">選挙・候補者を検索</h1>
+  <form class="zip" id="sf" style="margin-top:16px"><label for="sq" class="sr">キーワード</label><input id="sq" value="${esc(q)}" placeholder="地域名・選挙名・候補者名" style="border:1px solid var(--line)"><button class="btn blue">検索</button></form>
+  <div class="chips" style="margin-top:12px"><button data-t="" class="${qt?'':'on'}">すべて</button>${TYPES.map(t=>`<button data-t="${t}" class="${qt===t?'on':''}">${t}</button>`).join('')}</div>
+  <h2 class="res-h">選挙（${hitE.length}件）</h2>
+  ${hitE.length?`<div class="grid">${hitE.slice(0,60).map(ecard).join('')}</div>${hitE.length>60?`<p class="meta">ほか${hitE.length-60}件。地域名や選挙名で絞り込んでください。</p>`:''}`:`<p class="meta">「${esc(k)}」の選挙はまだ掲載されていません。2027年末までの予定にはありません。</p>`}
+  ${k?`<h2 class="res-h">候補者（${hitC.length+hitR.length}人）</h2><ul class="upd">${hitR.map(r=>`<li><a href="#${r.e.id}">${av({n:r.c.nm,col:'#8a94a6'})}<span><b>${esc(r.c.nm)}</b><span class="meta">${esc(r.c.p)}｜${esc(r.e.name)} ${esc(r.d.n)}選挙区｜立候補予定者</span></span></a></li>`).join('')}${hitC.map(([id,c])=>`<li><a href="#${id}">${av(c)}<span><b>${esc(c.n)}</b><span class="meta">${esc(c.party)}｜${esc(c.kata)}</span></span></a></li>`).join('')}</ul>`:''}
+  ${ad()}</div>`;
+}
+function candRow(id,e,i){
+  const c=C[id],paid=c.plan!=='free',v=e.res?e.res[id]:null,win=e.win&&e.win.includes(id);
+  return `<div class="cand">${av(c)}<div><h3>${esc(c.n)}</h3><div class="kana">${esc(c.k)}</div>
+   <div class="row"><span class="tag gray">${esc(c.party)}</span><span>${c.age}歳（${c.sex}）　${c.st}</span></div>
+   <div class="row meta">${esc(c.kata)}</div>
+   <div class="row"><span class="votes">${win?'<span class="win">当選</span> ':''}${v?v.toLocaleString():'-'} 票</span></div></div>
+   ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><a class="more" href="#${id}">この候補者の政策・活動を見る</a>`:
+   `<div class="freeinfo"><a href="#${id}">基本情報を見る</a><span>運営調べ・陣営未登録</span></div>`}</div>${i===1?ad('広告（候補者一覧の2人目のあと）'):''}`;
+}
+function candRows(d){
+  return d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><h3 style="font-size:19px">${esc(c.nm)}</h3><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
+   +`<p class="meta">${d.off?'届出順。選挙管理委員会への立候補届出に基づきます。':'立候補予定者（告示前・報道に基づく）。正式な候補者は告示日の届出後に更新します。'}</p><p class="src">出典：${esc(d.src)}</p>`;
+}
+function distBlock(e){
+  const ds=distOf(e);if(!ds)return '';const D=DIST[e.name];
+  if(ds.length===1){const d=ds[0];
+    return `<section style="margin:20px 0" id="d-0"><h2 style="font-size:22px">定数・候補者</h2><div class="kv" style="margin:8px 0"><span><b>区域</b>${esc(d.a)}</span><span><b>定数</b>${d.s}</span>${d.c?`<span><b>候補者数</b>${d.c.length}人${d.c.length>d.s?`（${(d.c.length/d.s).toFixed(2)}倍）`:''}</span>`:''}</div>
+    ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
+  return `<section style="margin:20px 0"><h2 style="font-size:22px">選挙区・定数</h2><p class="meta">${esc(D.total)}。${esc(D.stat||'')}</p>
+  <div class="scroll"><table class="cmp dtab"><tr><th>選挙区</th><th>区域（市町村）</th><th>定数</th><th>${ds.some(d=>d.off)?'候補者':'立候補予定者'}</th></tr>
+  ${ds.map((d,i)=>`<tr><td>${d.c?`<button class="lnk" data-go="d-${i}">${esc(d.n)}</button>`:esc(d.n)}</td><td>${esc(d.a)}</td><td>${d.s}</td><td>${d.c?`${d.c.length}人${d.c.length>d.s?`<span class="meta">（${(d.c.length/d.s).toFixed(2)}倍）</span>`:''}`:'<span class="meta">調査中</span>'}</td></tr>`).join('')}</table></div>
+  <p class="src">${esc(D.src)}</p>
+  ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d)}</div>`:'').join('')}
+  </section>`;
+}
+function election(e){
+  const d=days(e.date);
+  return `<div class="wrap"><div class="crumb"><a href="#home">トップ</a> ＞ ${esc(e.pref)}</div>
+  <div class="ehead"><span class="tag">${esc(e.pref)}</span><h1>${esc(e.name)}${e.dist?` ${esc(e.dist)}`:''}</h1>
+   <div class="kv"><span><b>投票日</b>${when(e)}</span><span><b>告示日</b>${e.kokuji?fmt(e.kokuji)+(e.mk?'（見込み）':''):'未定'}</span>${e.seats?`<span><b>定数</b>${e.seats}</span>`:''}${e.cands.length?`<span><b>候補者数</b>${e.cands.length+(e.others||0)}人</span>`:''}<span><b>種類</b>${esc(e.type)}</span></div>${e.smp?'<p class="meta">※この選挙と候補者は架空のサンプルです</p>':''}</div>
+  ${e.done||e.ap?'':`<div class="count"><b>${Math.max(d,0)}</b><div><strong>投票日まであと${Math.max(d,0)}日</strong><br><span class="meta">期日前投票は告示日の翌日から。投票所はお住まいの選挙管理委員会のサイトで確認できます。</span></div></div>`}
+  ${e.note?`<p>${esc(e.note)}</p>`:''}
+  ${distBlock(e)}
+  ${!e.cands.length&&!e.others&&!((distOf(e)||[]).some(d=>d.c)||(DIST[e.name]&&e.kokuji&&days(e.kokuji)<=0))?`<div class="notice"><strong>候補者は告示日${e.kokuji?`（${fmt(e.kokuji)}${e.mk?'・見込み':''}）`:''}の立候補届出後に掲載します。</strong><br>立候補予定の陣営の方は、事前に陣営アカウントを作成しておくと、告示日当日から写真や政策を掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`:''}
+  ${!e.cands.length?ad():''}
+  <h2 style="font-size:22px;margin-top:20px;${e.cands.length?'':'display:none'}">${e.done?'開票結果':'候補者'}<span class="meta" style="font-size:13px;font-weight:400">　届出順（全プラン共通）</span></h2>
+  ${e.cands.map((id,i)=>candRow(id,e,i)).join('')}
+  ${e.others?`<p class="meta">ほか${e.others}名（サンプルでは省略）</p>`:''}
+  <p class="src">出典：${esc(e.src)}／最終更新 ${fmt(UPDATED)}（運営）。日程は変更されることがあります。最新の情報は各選挙管理委員会でご確認ください。</p></div>`;
+}
+function cand(id){
+  const c=C[id],e=eOf(id)||E.find(x=>x.cands.includes(id)),paid=c.plan!=='free',pre=c.plan==='pre';
+  const secs=[['p-prof','プロフィール・略歴',paid],['p-act','活動実績',pre],['p-pol','政策・メッセージ',paid],['p-hist','これまでの得票',true],['p-sns','SNS・動画',paid]];
+  const hist=E.filter(x=>x.done&&x.cands.includes(id));
+  return `<div class="wrap prof"><div class="crumb"><a href="#home">トップ</a> ＞ <a href="#${e.id}">${esc(e.name)}</a> ＞ ${esc(c.n)}</div>
+  <div class="ptop"><h1>${esc(c.n)}</h1><div class="meta">${esc(c.k)}／${c.age}歳／${c.sex}</div>${av(c)}
+   ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div>`:''}</div>
+  <table class="info"><tr><th>選挙</th><td><a href="#${e.id}">${esc(e.name)}</a>（${fmt(e.date)}）</td></tr>
+   ${e.dist?`<tr><th>選挙区</th><td>${esc(e.dist)}</td></tr>`:''}<tr><th>肩書</th><td>${esc(c.kata)}</td></tr><tr><th>党派</th><td>${esc(c.party)}</td></tr><tr><th>新現元</th><td>${c.st}</td></tr>
+   <tr><th>情報</th><td><span class="tag">${paid?'陣営確認済み':'運営調べ'}</span> <span class="meta">${P[c.plan]}プラン</span></td></tr></table>
+  ${paid?'':`<div class="notice"><strong>このページは運営が公開情報から作成しています。</strong><br>陣営の方は、本人確認のうえ写真・キャッチコピー・政策などを掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`}
+  <div class="menu">${secs.map(s=>`<button data-go="${s[0]}" ${s[2]?'':'disabled'}>${s[1]}</button>`).join('')}</div>
+  ${pre?'':ad('広告（プレミアムプランでは非表示）')}
+  ${paid?`<section class="ps" id="p-prof"><h2>${esc(c.n)} プロフィール・略歴</h2>
+   <h3>パーソナルデータ</h3><table class="info"><tr><th>生年月日</th><td>${esc(c.birth||'-')}</td></tr><tr><th>年齢</th><td>${c.age}歳</td></tr><tr><th>出身地</th><td>${esc(c.from||'-')}</td></tr></table>
+   <h3>略歴</h3><ul>${(c.career||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`:''}
+  ${pre&&c.act?`<section class="ps" id="p-act"><h2>${esc(c.n)} 活動実績</h2><p>${esc(c.act)}</p></section>`:''}
+  ${paid?`<section class="ps" id="p-pol"><h2>${esc(c.n)} 政策・メッセージ</h2>
+   ${(c.pol||[]).map(p=>`<h3>${esc(p[0])}</h3><ul>${p[1].map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`).join('')}
+   <h3>有権者の皆さまへ</h3><p>${esc(c.msg||'')}</p></section>`:''}
+  <section class="ps" id="p-hist"><h2>これまでの得票</h2><table class="hist">
+   <tr><td><a href="#${e.id}">${esc(e.name)}（${fmt(e.date)}）</a></td><td>- 票</td></tr>
+   ${hist.map(h=>`<tr><td><a href="#${h.id}">${esc(h.name)}（${fmt(h.date)}）</a></td><td>${h.win.includes(id)?'<span class="win">当選</span> ':''}${h.res[id].toLocaleString()} 票</td></tr>`).join('')}
+   ${hist.length?'':'<tr><td colspan="2" class="meta">掲載できる過去の選挙はありません</td></tr>'}</table><p class="src">出典：各選挙管理委員会の開票結果</p></section>
+  ${paid?`<section class="ps" id="p-sns"><h2>SNS・動画</h2><div class="sns">${(c.sns||[]).map(s=>`<span>${s}</span>`).join('')}</div>
+   ${pre?`<h3>動画</h3><div class="video">YouTube 動画の埋め込み（プレミアム）</div>`:''}</section>`:''}
+  </div>`;
+}
+const feats=[['名前・年齢・党派・肩書などの基本情報','運営掲載','○','○'],['得票履歴（公的な開票結果）','○','○','○'],['陣営による情報の修正','○','○','○'],['顔写真','1枚','1枚','3枚まで'],['キャッチコピー吹き出し（一覧にも表示）','-','○','○'],['プロフィール・略歴','-','○','○'],['政策・メッセージ','-','2,000字','無制限・画像可'],['SNSリンク','-','○','○'],['活動実績','-','-','○'],['YouTube動画の埋め込み','-','-','○'],['閲覧数レポート','-','-','○'],['自分のページの広告を非表示','-','-','○'],['一覧での表示順','届出順','届出順','届出順']];
+function plans(){
+  return `<div class="wrap band"><h1 style="font-size:clamp(28px,4vw,40px)">陣営の方へ：掲載プラン</h1>
+  <p class="meta" style="max-width:40em">基本情報は、選挙管理委員会の告示などをもとに運営が全候補者を無料で掲載します。有料プランでは、陣営が自分の言葉で伝えられる範囲が広がります。表示順はどのプランでも届出順で、料金によって変わりません。</p>
+  <div class="plans" style="margin-top:24px">
+   <div class="plan"><span class="tag gray">基本</span><h3>フリー</h3><div class="price">0円</div><ul><li>基本情報を運営が掲載</li><li>本人確認後、写真1枚と誤りの修正</li><li>得票履歴の表示</li></ul><a class="btn ghost" href="#edit" style="width:100%">無料で登録</a></div>
+   <div class="plan rec"><span class="tag hot">おすすめ</span><h3>スタンダード</h3><div class="price">9,800円<small>／1選挙（税込・仮）</small></div><ul><li>キャッチコピー吹き出し</li><li>プロフィール・略歴</li><li>政策・メッセージ（2,000字）</li><li>SNSリンク</li></ul><a class="btn blue" href="#edit" style="width:100%">申し込む</a></div>
+   <div class="plan"><span class="tag">議員の常時掲載にも</span><h3>プレミアム</h3><div class="price">29,800円<small>／1選挙（税込・仮）</small></div><div class="meta">または月額 3,980円で常時掲載（仮）</div><ul><li>スタンダードの全機能</li><li>活動実績・動画埋め込み</li><li>政策は無制限・画像可</li><li>閲覧数レポート</li><li>自分のページの広告を非表示</li></ul><a class="btn ghost" href="#edit" style="width:100%">申し込む</a></div>
+  </div>
+  <h2 style="font-size:22px;margin:36px 0 12px">機能の比較</h2>
+  <div class="scroll"><table class="cmp"><tr><th>機能</th><th>フリー</th><th>スタンダード</th><th>プレミアム</th></tr>
+   ${feats.map(f=>`<tr><td>${f[0]}</td>${f.slice(1).map(x=>`<td class="${x==='○'?'ok':''}">${x}</td>`).join('')}</tr>`).join('')}</table></div>
+  <div class="notice"><strong>運用前に確認が必要な点</strong><br>選挙期間中の有料掲載や内容の更新が公職選挙法上どう扱われるか（選挙運動用の有料ネット広告の禁止など）は、本番公開前に選挙法に詳しい弁護士への確認が必要です。料金はすべて仮の金額です。</div></div>`;
+}
+let pv='std';
+function edit(){
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">ログイン中：青山 そうた 陣営（サンプル）／プランを切り替えると、編集できる項目とプレビューが変わります。</p>
+  <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
+  <div class="edit"><form id="ef">
+   <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" value="青山 そうた" disabled></div>
+   <div class="fld"><label for="f-kata">肩書</label><input id="f-kata" value="NPO法人代表、元小学校教員"></div>
+   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${pv==='free'?'<span class="lock">スタンダード以上</span>':''}</label><input id="f-copy" maxlength="40" value="子育てするなら、みなみ野で。" ${pv==='free'?'disabled':''}></div>
+   <div class="fld"><label for="f-pol">政策・メッセージ ${pv==='free'?'<span class="lock">スタンダード以上</span>':pv==='std'?'<span class="meta">（2,000字まで）</span>':''}</label><textarea id="f-pol" ${pv==='free'?'disabled':''} ${pv==='std'?'maxlength="2000"':''}>放課後の居場所を全小学校区に。デマンド交通の県補助を拡充します。</textarea></div>
+   <div class="fld"><label for="f-act">活動実績 ${pv!=='pre'?'<span class="lock">プレミアムのみ</span>':''}</label><textarea id="f-act" ${pv!=='pre'?'disabled':''}>NPO法人を立ち上げ、市内3か所で学童・学習支援を運営。</textarea></div>
+   <div class="fld"><label for="f-yt">YouTube動画のURL ${pv!=='pre'?'<span class="lock">プレミアムのみ</span>':''}</label><input id="f-yt" placeholder="https://www.youtube.com/watch?v=..." ${pv!=='pre'?'disabled':''}></div>
+   <button class="btn blue">保存して公開</button> <a href="#c1" class="btn ghost">公開ページを見る</a></form>
+   <div class="pv"><p class="meta" style="margin:12px 0 0">選挙ページ一覧での見え方</p><div id="prev"></div></div></div></div>`;
+}
+function renderPrev(){
+  const p=$('#prev');if(!p)return;
+  const c=Object.assign({},C.c1,{kata:$('#f-kata').value,copy:pv==='free'?'':$('#f-copy').value,plan:pv});
+  const paid=pv!=='free';
+  p.innerHTML=`<div class="cand" style="border:0">${av(c)}<div><h3>${esc(c.n)}</h3><div class="kana">${esc(c.k)}</div><div class="row"><span class="tag gray">${esc(c.party)}</span><span>${c.age}歳（${c.sex}）　${c.st}</span></div><div class="row meta">${esc(c.kata)}</div></div>
+   ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><span class="more" style="color:var(--sky)">この候補者の政策・活動を見る</span>`:`<div class="freeinfo"><span>基本情報を見る</span><span>運営調べ・陣営未登録</span></div>`}</div>`;
+}
+function route(){
+  const h=location.hash.slice(1)||'home',app=$('#app');
+  const e=E.find(x=>x.id===h);
+  app.innerHTML=h==='plans'?plans():h==='edit'?edit():h==='search'?search():e?election(e):C[h]?cand(h):home();
+  document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(['plans','edit','search'].includes(h)?h:'home')));
+  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':'投票日和')+'｜投票日和';
+  if(h==='edit')renderPrev();
+  window.scrollTo(0,0);closeD();
+}
+function closeD(){const d=$('#drawer');d.hidden=true;$('#mbtn').setAttribute('aria-expanded','false')}
+document.addEventListener('click',ev=>{
+  const g=ev.target.closest('[data-go]');if(g){const t=document.getElementById(g.dataset.go);if(t)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
+  const s=ev.target.closest('#seg button');if(s){pv=s.dataset.p;route();}
+  if(ev.target.closest('#mbtn')){const d=$('#drawer');d.hidden=!d.hidden;$('#mbtn').setAttribute('aria-expanded',String(!d.hidden));return;}
+  const to=ev.target.closest('[data-to]');if(to){ev.preventDefault();const go=()=>{const t=document.getElementById(to.dataset.to);if(t)t.scrollIntoView();};if((location.hash.slice(1)||'home')!=='home'){location.hash='home';setTimeout(go,50);}else{closeD();go();}return;}
+  const m=ev.target.closest('[data-m]');if(m){calM=m.dataset.m;const y=scrollY;route();scrollTo(0,y);return;}
+  const qb=ev.target.closest('[data-q]');if(qb){q=qb.dataset.q;qt='';location.hash==='#search'?route():location.hash='search';return;}
+  const tb=ev.target.closest('[data-t]');if(tb){qt=tb.dataset.t;if(!location.hash.startsWith('#search'))q='';location.hash==='#search'?route():location.hash='search';return;}
+  if(ev.target.closest('[data-art]'))toast('記事ページは次の段階で作成します');
+});
+document.addEventListener('input',ev=>{if(ev.target.closest('#ef'))renderPrev();});
+document.addEventListener('submit',ev=>{ev.preventDefault();
+  if(ev.target.id==='zipf'){const v=$('#zip').value.replace(/\D/g,'');if(v.length!==7){toast('郵便番号を7桁で入力してください');return;}toast('郵便番号から地域を判定する機能は次の段階で実装します。サンプルの選挙を表示します');location.hash='e2';}
+  else if(ev.target.id==='sf'){q=$('#sq').value;route();}
+  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('登録しました（プロトタイプのため実際には登録されません）');}
+  else toast('保存しました（プロトタイプのため実際には保存されません）');
+});
+addEventListener('hashchange',route);
+try{document.getElementById('upd').textContent=fmt(UPDATED)}catch(e){}
+route();
+}
+</script>
+</body>
+</html>
