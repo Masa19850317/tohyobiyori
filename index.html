@@ -160,7 +160,6 @@ table{border-collapse:collapse;width:100%}
 .reg h3{font-size:15px;color:var(--sub);margin-bottom:6px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{min-height:40px;padding:0 14px;font-size:14px}
-.chips button.smp{border-color:var(--sun);background:light-dark(#fff6d8,#2a2410)}
 .news{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .art{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-align:left;padding:0;color:var(--ink);cursor:pointer}
 .art svg{display:block;width:100%;height:auto}
@@ -185,7 +184,6 @@ table{border-collapse:collapse;width:100%}
 .toast.show{opacity:1}
 footer{background:var(--skyd);color:#d7e3ff;margin-top:48px;font-size:14px}
 footer a{color:#fff}
-.demo{font-size:12px;color:var(--sub);text-align:center;padding:8px}
 @media(max-width:760px){.hgrid,.edit,.plans,.two,.join{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:minmax(0,1fr)}.pv{position:static}.hd nav a.opt{display:none}}
 @media(max-width:600px){.fc{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px}.fc b{font-size:22px}.fc div{padding:12px}.cand{grid-template-columns:84px minmax(0,1fr)}.av{width:84px;height:100px}.cand h3{font-size:20px}.votes{margin-left:0}.logo small{display:none}.cmp{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.ecard,.toast{transition:none}}
@@ -199,9 +197,8 @@ footer a{color:#fff}
    <button class="ic" id="mbtn" aria-label="メニュー" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></nav>
 </div></header>
 <div id="drawer" hidden><div class="dr-in">
- <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="news">選挙ニュース</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
+ <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
 </div></div>
-<div class="demo">プロトタイプ：選挙日程は<span id="upd">2026年11月17日</span>時点で公表・報道されている実際の予定です（2027年分は見込みを含みます）。「あおば県」の選挙とその候補者は、ページの見本用の架空データです</div>
 <main id="app"></main>
 <footer><div class="wrap band">
   <div class="logo" style="color:#fff">投票日和</div>
@@ -213,13 +210,7 @@ footer a{color:#fff}
 <script>
 {
 const P={free:'フリー',std:'スタンダード',pre:'プレミアム'};
-const E=[
- {id:'e2',name:'あおば県議会議員選挙',dist:'みなみ野市選挙区',pref:'あおば県',date:'2026-12-13',kokuji:'2026-12-04',seats:2,src:'あおば県選挙管理委員会 告示（2026/12/4予定）',cands:['c1','c2','c3','c4']},
- {id:'e1',name:'みなみ野市長選挙',dist:'',pref:'あおば県 みなみ野市',date:'2026-12-13',kokuji:'2026-12-06',seats:1,src:'みなみ野市選挙管理委員会 告示（2026/12/6予定）',cands:['c5','c6']},
- {id:'e3',name:'さくら台町議会議員選挙',dist:'',pref:'あおば県 さくら台町',date:'2027-01-24',kokuji:'2027-01-19',seats:12,src:'さくら台町選挙管理委員会 公表資料',cands:['c7','c8','c9'],others:11},
- {id:'e4',name:'あおば県議会議員選挙',dist:'みなみ野市選挙区',pref:'あおば県',date:'2022-12-11',kokuji:'2022-12-02',seats:2,src:'あおば県選挙管理委員会 開票結果',done:true,cands:['c2','c1','c3'],res:{c2:15820,c1:9102,c3:13410},win:['c2','c3']}
-];
-E.forEach(e=>{e.smp=true});E[0].type='都道府県議';E[1].type='市区町村長';E[2].type='市区町村議';E[3].type='都道府県議';
+const E=[];
 const typeOf=n=>n.includes('知事')?'知事':/[都道府県]議会/.test(n)&&!/[市町村]議会/.test(n)?'都道府県議':n.includes('議会議員')?'市区町村議':'市区町村長';
 const SRC27='選挙ナビ（senkyonavi.jp）「2027年の選挙日程」掲載情報（2026年11月17日時点）';
 let ri=0;
@@ -229,7 +220,7 @@ let ri=0;
   note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
  note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
-const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,res:c&&c.res,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v:v===undefined||v===''?null:+v,w:w||''}}):null}})};
+const distOf=e=>{const d=DIST[e.name];if(!d)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,res:c&&c.res,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v:v===undefined||v===''?null:+v,w:w||''}}):null}})};
 const hasV=d=>d.c&&d.c.some(c=>c.v!==null);
 const resOf=e=>{const ds=distOf(e)||[];const r=ds.map(d=>d.res).filter(Boolean);if(!r.length)return null;return r.some(x=>x.st!=='確定')?'速報':'確定'};
 const vfmt=v=>Number.isInteger(v)?v.toLocaleString():v.toLocaleString(undefined,{maximumFractionDigits:3});
@@ -238,52 +229,25 @@ const distTxt=e=>{const d=DIST[e.name];return d?d.list.replace(/\|\d+/g,''):''};
 const when=e=>e.ap?`${e.date.slice(0,4)}年${e.ap}`:fmt(e.date)+(e.mk?'（見込み）':'');
 const TYPES=['国政','知事','都道府県議','市区町村長','市区町村議'];
 const REG=[['北海道・東北','北海道 青森 岩手 宮城 秋田 山形 福島'],['関東','茨城 栃木 群馬 埼玉 千葉 東京 神奈川'],['中部','新潟 富山 石川 福井 山梨 長野 岐阜 静岡 愛知'],['近畿','三重 滋賀 京都 大阪 兵庫 奈良 和歌山'],['中国・四国','鳥取 島根 岡山 広島 山口 徳島 香川 愛媛 高知'],['九州・沖縄','福岡 佐賀 長崎 熊本 大分 宮崎 鹿児島 沖縄']];
-const NEWS=[['ガイド','期日前投票、いつ・どこで・何を持っていく？','#ffc93c','2026/11/16'],['選挙区レポート','みなみ野市長選、争点は駅前再開発の第2期','#3d7ef0','2026/11/15'],['はじめての投票','18歳になったら知っておきたい、投票の流れ','#e2553a','2026/11/12'],['比べ方','候補者の政策は「いつまでに・どれだけ」を見る','#2f9e6a','2026/11/10']];
-const UPD=[['c1','政策・メッセージを更新','2時間前'],['c5','活動実績を追加','5時間前'],['c4','キャッチコピーを設定','昨日'],['c8','プロフィールを登録','2日前']];
 let q='',qt='',calM='';
-const C={
- c1:{n:'青山 そうた',k:'アオヤマ ソウタ',age:44,sex:'男',st:'新人',party:'無所属',kata:'NPO法人代表、元小学校教員',plan:'pre',col:'#3d7ef0',
-  copy:'子育てするなら、みなみ野で。',birth:'1982年3月8日',from:'あおば県みなみ野市',
-  career:['みなみ野市立東小学校 卒業','あおば県立北高校 卒業','国立あおば大学 教育学部 卒業','みなみ野市内の小学校で教員として12年勤務','NPO法人「放課後みなみ野」設立、代表理事'],
-  act:'教員時代に感じた「放課後の居場所が足りない」という課題から、NPO法人を立ち上げ、市内3か所で学童・学習支援を運営してきました。登録児童はのべ1,200人。地域の高校生ボランティアとともに、子どもが安心して過ごせる場所づくりを続けています。',
-  pol:[['子育て・教育',['放課後の居場所を全小学校区に','県立高校の通学バス路線の見直し','教員の事務負担を減らすICT導入']],['くらし・交通',['デマンド交通の県補助を拡充','免許返納後も通院・買い物に困らない地域交通']],['産業',['県産果物のブランド化と販路開拓','空き店舗を使った若手の開業支援']]],
-  msg:'「この町で子どもを育ててよかった」と思える県政へ。現場で見てきた課題を、県議会で一つずつ解決します。',
-  sns:['X','Instagram','YouTube','Facebook'],hist:[['e4',null]]},
- c2:{n:'川辺 まさみ',k:'カワベ マサミ',age:58,sex:'女',st:'現職',party:'あおば未来の会',kata:'県議会議員（2期）',plan:'std',col:'#e2553a',
-  copy:'医療と福祉に、もう一歩。',birth:'1968年6月21日',from:'あおば県みなみ野市',
-  career:['あおば県立南高校 卒業','看護師として地域病院に20年勤務','2018年 あおば県議会議員 初当選','2022年 再選（2期目）'],
-  pol:[['医療・福祉',['周産期医療の広域連携を推進','訪問看護ステーションの人材確保']],['防災',['河川改修の前倒し']]],
-  msg:'看護の現場から県政へ。命と暮らしを守る政策を続けます。',sns:['X','Facebook'],hist:[['e4',null]]},
- c3:{n:'森 けんじ',k:'モリ ケンジ',age:67,sex:'男',st:'現職',party:'無所属',kata:'県議会議員（3期）、農業',plan:'free',col:'#2f9e6a',hist:[['e4',null]]},
- c4:{n:'橘 ゆい',k:'タチバナ ユイ',age:36,sex:'女',st:'新人',party:'無所属',kata:'会社員、子育て中',plan:'std',col:'#a35bd6',
-  copy:'働く世代の声を、県議会に。',birth:'1990年11月2日',from:'あおば県あさひ市',career:['あおば県立西高校 卒業','私立大学 経済学部 卒業','IT企業で人事・労務を担当'],
-  pol:[['働き方',['県内企業のテレワーク導入支援','男性の育休取得率向上']]],msg:'二児の母として、働きながら子育てする人の声を届けます。',sns:['Instagram','X'],hist:[]},
- c5:{n:'野村 たかし',k:'ノムラ タカシ',age:62,sex:'男',st:'現職',party:'無所属',kata:'みなみ野市長（1期）',plan:'pre',col:'#d48a00',
-  copy:'続けて、仕上げる。みなみ野の4年。',birth:'1964年9月14日',from:'あおば県みなみ野市',career:['国立あおば大学 法学部 卒業','みなみ野市役所 入庁（企画部長を歴任）','2022年 みなみ野市長 初当選'],
-  act:'1期目では、市立病院の小児科夜間診療の再開、駅前広場の再整備、ふるさと納税の寄付額倍増に取り組みました。',
-  pol:[['まちづくり',['駅前再開発の第2期','市内循環バスの増便']],['財政',['市債残高の計画的な削減']]],msg:'始めたことを、最後までやり遂げます。',sns:['X','YouTube','Facebook'],hist:[]},
- c6:{n:'春日 ちひろ',k:'カスガ チヒロ',age:49,sex:'女',st:'新人',party:'無所属',kata:'元市議会議員',plan:'free',col:'#1aa3a3',hist:[]},
- c7:{n:'大森 ひでお',k:'オオモリ ヒデオ',age:71,sex:'男',st:'現職',party:'無所属',kata:'町議会議員（5期）',plan:'free',col:'#6b7a90',hist:[]},
- c8:{n:'佐野 みく',k:'サノ ミク',age:29,sex:'女',st:'新人',party:'無所属',kata:'カフェ経営',plan:'std',col:'#e86a9a',copy:'若い人が戻ってくる町へ。',career:['さくら台町出身','都内の飲食店勤務を経てUターン'],pol:[['移住・定住',['空き家バンクの使いやすさ改善']]],msg:'町の外を見てきたからこそ、町の良さを伝えたい。',sns:['Instagram'],hist:[]},
- c9:{n:'井口 まもる',k:'イグチ マモル',age:55,sex:'男',st:'元職',party:'さくら台みらい',kata:'農業法人役員',plan:'free',col:'#8a6d3b',hist:[]}
-};
+const C={};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>{const [y,m,dd]=d.split('-');return `${y}年${+m}月${+dd}日`};
 const days=d=>Math.ceil((new Date(d+'T00:00:00+09:00')-new Date())/864e5);
 const eOf=c=>E.find(e=>!e.done&&e.cands.includes(c));
-const av=(c,w=110,h=132)=>`<svg class="av" viewBox="0 0 110 132" role="img" aria-label="${esc(c.n)}の写真（サンプル）"><rect width="110" height="132" rx="12" fill="${c.col}"/><circle cx="55" cy="54" r="24" fill="#ffffff" opacity=".9"/><path d="M14 132c4-30 20-44 41-44s37 14 41 44z" fill="#ffffff" opacity=".9"/><text x="55" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="${c.col}" font-family="Zen Maru Gothic,sans-serif">${esc(c.n[0])}</text></svg>`;
+const av=(c,w=110,h=132)=>`<svg class="av" viewBox="0 0 110 132" role="img" aria-label="${esc(c.n)}の写真（未登録）"><rect width="110" height="132" rx="12" fill="${c.col}"/><circle cx="55" cy="54" r="24" fill="#ffffff" opacity=".9"/><path d="M14 132c4-30 20-44 41-44s37 14 41 44z" fill="#ffffff" opacity=".9"/><text x="55" y="62" text-anchor="middle" font-size="22" font-weight="700" fill="${c.col}" font-family="Zen Maru Gothic,sans-serif">${esc(c.n[0])}</text></svg>`;
 const ad=(t='バナー広告 728×90 / 320×100')=>`<div class="ad"><b>広告</b>${t}</div>`;
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400)};
 
 function ecard(e){
-  const d=days(e.date),rs=e.smp?null:resOf(e);
+  const d=days(e.date),rs=resOf(e);
   return `<a class="ecard" href="#${e.id}"><span class="tag ${rs==='速報'||(!e.ap&&d<=30&&d>=0)?'hot':''}">${rs==='速報'?'開票速報中':rs==='確定'?'開票結果あり':e.done?'終了':e.ap?'時期の見込み':d>=0?`投票日まであと${d}日`:'投票日'}</span>
   <h3>${esc(e.name)}${e.dist?`<br><small style="font-size:14px">${esc(e.dist)}</small>`:''}</h3>
-  <div class="meta">${e.smp?'<span class="tag gray">架空サンプル</span> ':''}${esc(e.pref)}｜投票日 ${when(e)}${e.count?`｜${e.count}件`:''}${e.seats?`｜定数 ${e.seats}`:''}${e.cands.length?`｜候補者 ${e.cands.length+(e.others||0)}人`:''}</div></a>`;
+  <div class="meta">${esc(e.pref)}｜投票日 ${when(e)}${e.count?`｜${e.count}件`:''}${e.seats?`｜定数 ${e.seats}`:''}${e.cands.length?`｜候補者 ${e.cands.length+(e.others||0)}人`:''}</div></a>`;
 }
 function home(){
-  const up=E.filter(e=>!e.done&&!e.smp&&days(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
+  const up=E.filter(e=>!e.done&&days(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
   const months=[...new Set(up.map(e=>e.date.slice(0,7)))];if(!months.includes(calM))calM=months[0];
   const wk='日月火水木金土';
   return `<section class="hero"><div class="wrap band hgrid">
@@ -307,26 +271,20 @@ function home(){
    <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの選挙</span></div></div></div>
 
   <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
-   <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
-   <div class="sec-h" style="margin-top:32px"><h2 style="font-size:20px">候補者ページの見本</h2><span class="meta">架空の選挙・候補者です</span></div>
-   <div class="grid">${E.filter(e=>e.smp&&!e.done).map(ecard).join('')}</div></section>
+   <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div></section>
 
   <section class="wrap band" style="padding-top:0"><div class="two">
    <div id="cal"><div class="sec-h"><h2>選挙カレンダー</h2></div>
     <div class="cal-tabs">${months.map(m=>`<button data-m="${m}" class="${m===calM?'on':''}">${m.slice(2,4)}年${+m.slice(5)}月（${up.filter(e=>e.date.startsWith(m)).length}）</button>`).join('')}</div>
     <div class="cal">${up.filter(e=>e.date.startsWith(calM)).map(e=>{const dt=new Date(e.date+'T00:00:00+09:00');return `<a href="#${e.id}"><span class="dt">${e.ap?`${+e.date.slice(5,7)}月<small>ごろ</small>`:`${+e.date.slice(5,7)}/${+e.date.slice(8)}<small>${wk[dt.getDay()]}曜</small>`}</span><span><strong>${esc(e.name)}${e.dist?' '+esc(e.dist):''}</strong><span class="meta">${esc(e.pref)}｜${esc(e.type)}｜告示 ${e.kokuji?`${+e.kokuji.slice(5,7)}/${+e.kokuji.slice(8)}`:'未定'}${e.mk?'（見込み）':''}${e.count?`｜${e.count}件`:''}</span></span><span class="tag ${!e.ap&&days(e.date)<=30?'hot':''}">${e.ap?esc(e.ap):`あと${days(e.date)}日`}</span></a>`}).join('')}</div></div>
-   <aside><div class="sec-h"><h2 style="font-size:20px">陣営の最新更新</h2></div>
-    <ul class="upd">${UPD.map(([id,t,w])=>{const c=C[id],e=eOf(id);return `<li><a href="#${id}">${av(c)}<span><b>${esc(c.n)}</b><span class="meta">${esc(e.name)}｜${t}・${w}</span></span></a></li>`}).join('')}</ul>
+   <aside>
     ${ad('広告 300×250')}</aside></div></section>
 
   <section class="wrap band" id="pref" style="padding-top:0"><div class="sec-h"><h2>地域から探す</h2></div>
-   <div class="reg"><div><h3>架空サンプル</h3><div class="chips"><button class="smp" data-q="あおば県">あおば県</button></div></div>
+   <div class="reg">
    ${REG.map(([r,ps])=>`<div><h3>${r}</h3><div class="chips">${ps.split(' ').map(p=>`<button data-q="${p==='北海道'?p:p+(p==='東京'?'都':/^(京都|大阪)$/.test(p)?'府':'県')}">${p}</button>`).join('')}</div></div>`).join('')}</div>
    <h2 style="font-size:20px;margin:28px 0 12px">選挙の種類から探す</h2>
    <div class="chips">${TYPES.map(t=>`<button data-t="${t}">${t}</button>`).join('')}</div></section>
-
-  <section class="wrap band" id="news" style="padding-top:0"><div class="sec-h"><h2>選挙ニュース・ガイド</h2><span class="meta">サンプル記事</span></div>
-   <div class="news">${NEWS.map(([c,t,col,dt])=>`<button class="art" data-art="1"><svg viewBox="0 0 320 150" aria-hidden="true"><rect width="320" height="150" fill="${col}"/><circle cx="260" cy="40" r="60" fill="#fff" opacity=".18"/><rect x="24" y="70" width="90" height="56" rx="8" fill="#fff" opacity=".9"/><rect x="40" y="82" width="58" height="6" rx="3" fill="${col}"/><rect x="40" y="96" width="40" height="6" rx="3" fill="${col}" opacity=".6"/></svg><div><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${dt}</span></div></button>`).join('')}</div></section>
 
   <section class="wrap band" style="padding-top:0"><div class="sec-h"><h2>投票に行く前に</h2></div><div class="steps">
    <div><h3>期日前投票も使える</h3><p>告示日の翌日から投票日の前日まで、市役所などで投票できます。予定がある日も安心です。</p></div>
@@ -385,7 +343,7 @@ function election(e){
   const d=days(e.date);
   return `<div class="wrap"><div class="crumb"><a href="#home">トップ</a> ＞ ${esc(e.pref)}</div>
   <div class="ehead"><span class="tag">${esc(e.pref)}</span><h1>${esc(e.name)}${e.dist?` ${esc(e.dist)}`:''}</h1>
-   <div class="kv"><span><b>投票日</b>${when(e)}</span><span><b>告示日</b>${e.kokuji?fmt(e.kokuji)+(e.mk?'（見込み）':''):'未定'}</span>${e.seats?`<span><b>定数</b>${e.seats}</span>`:''}${e.cands.length?`<span><b>候補者数</b>${e.cands.length+(e.others||0)}人</span>`:''}<span><b>種類</b>${esc(e.type)}</span></div>${e.smp?'<p class="meta">※この選挙と候補者は架空のサンプルです</p>':''}</div>
+   <div class="kv"><span><b>投票日</b>${when(e)}</span><span><b>告示日</b>${e.kokuji?fmt(e.kokuji)+(e.mk?'（見込み）':''):'未定'}</span>${e.seats?`<span><b>定数</b>${e.seats}</span>`:''}${e.cands.length?`<span><b>候補者数</b>${e.cands.length+(e.others||0)}人</span>`:''}<span><b>種類</b>${esc(e.type)}</span></div></div>
   ${e.done||e.ap?'':`<div class="count"><b>${Math.max(d,0)}</b><div><strong>投票日まであと${Math.max(d,0)}日</strong><br><span class="meta">期日前投票は告示日の翌日から。投票所はお住まいの選挙管理委員会のサイトで確認できます。</span></div></div>`}
   ${e.note?`<p>${esc(e.note)}</p>`:''}
   ${distBlock(e)}
@@ -393,7 +351,6 @@ function election(e){
   ${!e.cands.length?ad():''}
   <h2 style="font-size:22px;margin-top:20px;${e.cands.length?'':'display:none'}">${e.done?'開票結果':'候補者'}<span class="meta" style="font-size:13px;font-weight:400">　届出順（全プラン共通）</span></h2>
   ${e.cands.map((id,i)=>candRow(id,e,i)).join('')}
-  ${e.others?`<p class="meta">ほか${e.others}名（サンプルでは省略）</p>`:''}
   <p class="src">出典：${esc(e.src)}／最終更新 ${fmt(UPDATED)}（運営）。日程は変更されることがあります。最新の情報は各選挙管理委員会でご確認ください。</p></div>`;
 }
 function cand(id){
@@ -440,21 +397,21 @@ function plans(){
 }
 let pv='std';
 function edit(){
-  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">ログイン中：青山 そうた 陣営（サンプル）／プランを切り替えると、編集できる項目とプレビューが変わります。</p>
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">陣営アカウントでログインすると、ここで掲載内容を編集できます。プランを切り替えると、編集できる項目とプレビューが変わります。</p>
   <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
   <div class="edit"><form id="ef">
-   <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" value="青山 そうた" disabled></div>
-   <div class="fld"><label for="f-kata">肩書</label><input id="f-kata" value="NPO法人代表、元小学校教員"></div>
-   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${pv==='free'?'<span class="lock">スタンダード以上</span>':''}</label><input id="f-copy" maxlength="40" value="子育てするなら、みなみ野で。" ${pv==='free'?'disabled':''}></div>
-   <div class="fld"><label for="f-pol">政策・メッセージ ${pv==='free'?'<span class="lock">スタンダード以上</span>':pv==='std'?'<span class="meta">（2,000字まで）</span>':''}</label><textarea id="f-pol" ${pv==='free'?'disabled':''} ${pv==='std'?'maxlength="2000"':''}>放課後の居場所を全小学校区に。デマンド交通の県補助を拡充します。</textarea></div>
-   <div class="fld"><label for="f-act">活動実績 ${pv!=='pre'?'<span class="lock">プレミアムのみ</span>':''}</label><textarea id="f-act" ${pv!=='pre'?'disabled':''}>NPO法人を立ち上げ、市内3か所で学童・学習支援を運営。</textarea></div>
+   <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" value="" placeholder="選挙管理委員会への届出どおりに表示されます" disabled></div>
+   <div class="fld"><label for="f-kata">肩書</label><input id="f-kata" value="" placeholder="例：会社員、元市職員"></div>
+   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${pv==='free'?'<span class="lock">スタンダード以上</span>':''}</label><input id="f-copy" maxlength="40" value="" placeholder="例：まちの声を、まっすぐ届けます。" ${pv==='free'?'disabled':''}></div>
+   <div class="fld"><label for="f-pol">政策・メッセージ ${pv==='free'?'<span class="lock">スタンダード以上</span>':pv==='std'?'<span class="meta">（2,000字まで）</span>':''}</label><textarea id="f-pol" ${pv==='free'?'disabled':''} ${pv==='std'?'maxlength="2000"':''}></textarea></div>
+   <div class="fld"><label for="f-act">活動実績 ${pv!=='pre'?'<span class="lock">プレミアムのみ</span>':''}</label><textarea id="f-act" ${pv!=='pre'?'disabled':''}></textarea></div>
    <div class="fld"><label for="f-yt">YouTube動画のURL ${pv!=='pre'?'<span class="lock">プレミアムのみ</span>':''}</label><input id="f-yt" placeholder="https://www.youtube.com/watch?v=..." ${pv!=='pre'?'disabled':''}></div>
-   <button class="btn blue">保存して公開</button> <a href="#c1" class="btn ghost">公開ページを見る</a></form>
+   <button class="btn blue">保存して公開</button></form>
    <div class="pv"><p class="meta" style="margin:12px 0 0">選挙ページ一覧での見え方</p><div id="prev"></div></div></div></div>`;
 }
 function renderPrev(){
   const p=$('#prev');if(!p)return;
-  const c=Object.assign({},C.c1,{kata:$('#f-kata').value,copy:pv==='free'?'':$('#f-copy').value,plan:pv});
+  const c=Object.assign({n:'候補者 氏名',k:'コウホシャ シメイ',party:'党派',age:'〇〇',sex:'〇',st:'新人',col:'#8a94a6'},{kata:$('#f-kata').value,copy:pv==='free'?'':$('#f-copy').value,plan:pv});
   const paid=pv!=='free';
   p.innerHTML=`<div class="cand" style="border:0">${av(c)}<div><h3>${esc(c.n)}</h3><div class="kana">${esc(c.k)}</div><div class="row"><span class="tag gray">${esc(c.party)}</span><span>${c.age}歳（${c.sex}）　${c.st}</span></div><div class="row meta">${esc(c.kata)}</div></div>
    ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><span class="more" style="color:var(--sky)">この候補者の政策・活動を見る</span>`:`<div class="freeinfo"><span>基本情報を見る</span><span>運営調べ・陣営未登録</span></div>`}</div>`;
@@ -475,7 +432,7 @@ const muniOf=c=>{c=c.replace(/^.+?郡/,'');const m=c.match(/^(.+?市)(.+区)$/);
 function area(){
   if(!AREA)return home();
   const {zip,pref,city,town}=AREA,mu=muniOf(city);
-  const up=E.filter(e=>!e.smp&&!e.done&&days(e.date)>=0);
+  const up=E.filter(e=>!e.done&&days(e.date)>=0);
   const hits=[];
   up.forEach(e=>{
     const p=e.pref.split(' ');
@@ -513,21 +470,19 @@ document.addEventListener('click',ev=>{
   const m=ev.target.closest('[data-m]');if(m){calM=m.dataset.m;const y=scrollY;route();scrollTo(0,y);return;}
   const qb=ev.target.closest('[data-q]');if(qb){q=qb.dataset.q;qt='';location.hash==='#search'?route():location.hash='search';return;}
   const tb=ev.target.closest('[data-t]');if(tb){qt=tb.dataset.t;if(!location.hash.startsWith('#search'))q='';location.hash==='#search'?route():location.hash='search';return;}
-  if(ev.target.closest('[data-art]'))toast('記事ページは次の段階で作成します');
 });
 document.addEventListener('input',ev=>{if(ev.target.closest('#ef'))renderPrev();});
 document.addEventListener('submit',ev=>{ev.preventDefault();
   if(ev.target.id==='zipf'){const raw=$('#zip').value.trim();const v=raw.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,'');
     if(v.length===7){lookupZip(v);}else if(raw&&!/^[\d０-９\-ー－\s]+$/.test(raw)){q=raw;qt='';location.hash==='#search'?route():location.hash='search';}else{toast('郵便番号を7桁で入力してください（市区町村名でも探せます）');}}
   else if(ev.target.id==='sf'){q=$('#sq').value;route();}
-  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('登録しました（プロトタイプのため実際には登録されません）');}
-  else toast('保存しました（プロトタイプのため実際には保存されません）');
+  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('会員登録は準備中です');}
+  else toast('保存機能は準備中です');
 });
 addEventListener('hashchange',route);
-try{document.getElementById('upd').textContent=fmt(UPDATED)}catch(e){}
 route();
 // 開票速報中の選挙があれば、5分ごとにページを読み込み直して最新の数字を表示する
-if(E.some(e=>!e.smp&&resOf(e)==='速報'))setInterval(()=>{if(document.visibilityState!=='hidden')location.reload()},300000);
+if(E.some(e=>resOf(e)==='速報'))setInterval(()=>{if(document.visibilityState!=='hidden')location.reload()},300000);
 }
 </script>
 </body>
