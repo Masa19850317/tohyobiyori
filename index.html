@@ -83,6 +83,9 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px so
 .count b{font:900 40px/1 "Zen Maru Gothic";color:var(--coral)}
 .cand{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
 .av{width:110px;height:132px;border-radius:12px;display:block}
+img.av{object-fit:cover;background:var(--soft)}
+.admf label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700}
+.admf input,.admf select{min-height:40px;border:1px solid var(--line);border-radius:8px;padding:0 10px;background:var(--card);color:var(--ink);font:inherit;font-weight:400}
 .cand h3{font-size:24px}
 .kana{font-size:13px;color:var(--sub)}
 .row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:6px;font-size:15px}
@@ -319,24 +322,24 @@ function candRow(id,e,i){
 }
 function resHead(d){const r=d.res;if(!r)return '';const live=r.st!=='確定';
   return `<div class="reshead ${live?'live':''}"><span class="tag ${live?'hot':''}">${live?'開票速報':'開票結果（確定）'}</span>${r.at?`<span>${esc(r.at)}${live?' 時点':''}</span>`:''}${r.rate?`<span>開票率 ${esc(r.rate)}</span>`:''}${r.turnout?`<span>投票率 ${esc(r.turnout)}</span>`:''}${live?'<span class="meta">このページは5分ごとに自動で更新されます</span>':''}</div>`;}
-function resRows(d){const tot=d.c.reduce((a,c)=>a+(c.v||0),0),mx=Math.max(1,...d.c.map(c=>c.v||0));
+function resRows(d,e){const tot=d.c.reduce((a,c)=>a+(c.v||0),0),mx=Math.max(1,...d.c.map(c=>c.v||0));
   const cs=[...d.c].sort((a,b)=>(b.v||0)-(a.v||0));
-  return resHead(d)+cs.map(c=>`<div class="cand rescand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><div class="row" style="justify-content:space-between;flex-wrap:wrap"><h3 style="font-size:19px">${c.w==='当'?'<span class="win">当選</span> ':''}${esc(c.nm)}</h3><span class="votes">${c.v!==null?vfmt(c.v):'-'} 票${tot&&c.v!==null?`<span class="meta" style="font-weight:400;font-size:13px">（${(c.v/tot*100).toFixed(1)}%）</span>`:''}</span></div><div class="vbar"><i style="width:${((c.v||0)/mx*100).toFixed(1)}%" class="${c.w==='当'?'w':''}"></i></div><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
+  return resHead(d)+cs.map(c=>`<div class="cand rescand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${kav(campOf(e,d.n,c.nm),c.nm)}<div><div class="row" style="justify-content:space-between;flex-wrap:wrap"><h3 style="font-size:19px">${c.w==='当'?'<span class="win">当選</span> ':''}${esc(c.nm)}</h3><span class="votes">${c.v!==null?vfmt(c.v):'-'} 票${tot&&c.v!==null?`<span class="meta" style="font-weight:400;font-size:13px">（${(c.v/tot*100).toFixed(1)}%）</span>`:''}</span></div><div class="vbar"><i style="width:${((c.v||0)/mx*100).toFixed(1)}%" class="${c.w==='当'?'w':''}"></i></div><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
    +`<p class="meta">得票数の多い順。${d.res&&d.res.st!=='確定'?'開票速報のため、数字は変わります。確定値は選挙管理委員会の発表をご確認ください。':'選挙管理委員会の発表に基づきます。'}</p><p class="src">出典：${esc((d.res&&d.res.src)||d.src)}</p>`;}
-function candRows(d){if(hasV(d)||d.res)return resRows(d);
-  return d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><h3 style="font-size:19px">${esc(c.nm)}</h3><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
+function candRows(d,e){if(hasV(d)||d.res)return resRows(d,e);
+  return d.c.map(c=>{const k=campOf(e,d.n,c.nm);return `<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${kav(k,c.nm)}<div><h3 style="font-size:19px">${esc(c.nm)}</h3><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span>${k?'<span class="tag">陣営確認済み</span>':''}</div>${k&&k.kata?`<div class="row meta">${esc(k.kata)}</div>`:''}${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}${k&&k.catch_copy?`<div class="bub">${esc(k.catch_copy)}</div>`:''}${k?`<a class="more" href="#k-${esc(k.id)}">${k.plan==='free'?'陣営の登録情報を見る':'この候補者の政策・活動を見る'}</a>`:''}</div></div>`}).join('')
    +`<p class="meta">${d.off?'届出順。選挙管理委員会への立候補届出に基づきます。':'立候補予定者（告示前・報道に基づく）。正式な候補者は告示日の届出後に更新します。'}</p><p class="src">出典：${esc(d.src)}</p>`;
 }
 function distBlock(e){
   const ds=distOf(e);if(!ds)return '';const D=DIST[e.name];
   if(ds.length===1){const d=ds[0];
     return `<section style="margin:20px 0" id="d-0"><h2 style="font-size:22px">${d.res?(d.res.st==='確定'?'開票結果':'開票速報'):'定数・候補者'}</h2><div class="kv" style="margin:8px 0"><span><b>区域</b>${esc(d.a)}</span><span><b>定数</b>${d.s}</span>${d.c?`<span><b>候補者数</b>${d.c.length}人${d.c.length>d.s?`（${(d.c.length/d.s).toFixed(2)}倍）`:''}</span>`:''}</div>
-    ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
+    ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d,e):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
   return `<section style="margin:20px 0"><h2 style="font-size:22px">選挙区・定数</h2><p class="meta">${esc(D.total)}。${esc(D.stat||'')}</p>
   <div class="scroll"><table class="cmp dtab"><tr><th>選挙区</th><th>区域（市町村）</th><th>定数</th><th>${ds.some(d=>d.off)?'候補者':'立候補予定者'}</th>${ds.some(d=>d.res)?'<th>開票</th>':''}</tr>
   ${ds.map((d,i)=>`<tr><td>${d.c?`<button class="lnk" data-go="d-${i}">${esc(d.n)}</button>`:esc(d.n)}</td><td>${esc(d.a)}</td><td>${d.s}</td><td>${d.c?`${d.c.length}人${d.c.length>d.s?`<span class="meta">（${(d.c.length/d.s).toFixed(2)}倍）</span>`:''}`:'<span class="meta">調査中</span>'}</td>${ds.some(d=>d.res)?`<td>${d.res?(d.res.st==='確定'?'確定':`<span class="tag hot">速報</span>${d.res.rate?' '+esc(d.res.rate):''}`):'<span class="meta">-</span>'}</td>`:''}</tr>`).join('')}</table></div>
   <p class="src">${esc(D.src)}</p>
-  ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d)}</div>`:'').join('')}
+  ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d,e)}</div>`:'').join('')}
   </section>`;
 }
 function election(e){
@@ -396,8 +399,8 @@ function plans(){
   <div class="notice"><strong>運用前に確認が必要な点</strong><br>選挙期間中の有料掲載や内容の更新が公職選挙法上どう扱われるか（選挙運動用の有料ネット広告の禁止など）は、本番公開前に選挙法に詳しい弁護士への確認が必要です。料金はすべて仮の金額です。</div></div>`;
 }
 let pv='std';
-function edit(){
-  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">陣営アカウントでログインすると、ここで掲載内容を編集できます。プランを切り替えると、編集できる項目とプレビューが変わります。</p>
+function editDemo(){
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><div class="notice"><strong>陣営ログインは準備中です。</strong><br>開始までのあいだは、編集画面の見え方をご確認いただけます。</div><p class="meta">プランを切り替えると、編集できる項目とプレビューが変わります。</p>
   <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
   <div class="edit"><form id="ef">
    <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" value="" placeholder="選挙管理委員会への届出どおりに表示されます" disabled></div>
@@ -411,6 +414,9 @@ function edit(){
 }
 function renderPrev(){
   const p=$('#prev');if(!p)return;
+  const m=ACC.my&&ACC.my.status==='approved'?ACC.my:null;
+  if(m){const cp=pv==='free'?'':$('#f-copy').value,f=$('#f-ph').files[0],img=f?`<img class="av" src="${URL.createObjectURL(f)}" alt="">`:kav(m,m.candidate_name);
+    p.innerHTML=`<div class="cand" style="border:0">${img}<div><h3>${esc(m.candidate_name)}</h3><div class="row"><span class="tag">陣営確認済み</span></div><div class="row meta">${esc($('#f-kata').value)}</div></div>${cp?`<div class="bub">${esc(cp)}</div>`:''}</div>`;return;}
   const c=Object.assign({n:'候補者 氏名',k:'コウホシャ シメイ',party:'党派',age:'〇〇',sex:'〇',st:'新人',col:'#8a94a6'},{kata:$('#f-kata').value,copy:pv==='free'?'':$('#f-copy').value,plan:pv});
   const paid=pv!=='free';
   p.innerHTML=`<div class="cand" style="border:0">${av(c)}<div><h3>${esc(c.n)}</h3><div class="kana">${esc(c.k)}</div><div class="row"><span class="tag gray">${esc(c.party)}</span><span>${c.age}歳（${c.sex}）　${c.st}</span></div><div class="row meta">${esc(c.kata)}</div></div>
@@ -452,12 +458,140 @@ function area(){
   ${ad()}
   <p class="src">住所の判定：郵便番号検索API（zipcloud）。選挙区は市区町村単位で判定しています。政令市の区や一部の地域で選挙区が分かれる場合は、選挙管理委員会の案内をご確認ください。</p></div>`;
 }
+// ===== 陣営ログイン（Supabase） =====
+// Supabase の Project URL と anon key（公開用の値）を入れると、陣営ログインが動きます。空のあいだは「準備中」と表示します。
+const SB={url:'',key:''};
+const sbOn=()=>!!(SB.url&&SB.key);
+let sbc=null;
+const sbLoad=async()=>{if(sbc)return sbc;const m=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');sbc=m.createClient(SB.url,SB.key,{auth:{persistSession:true,detectSessionInUrl:true}});return sbc;};
+const nz=s=>String(s||'').replace(/[\s　]/g,'');
+const photoUrl=p=>p?`${SB.url}/storage/v1/object/public/photos/${String(p).split('/').map(encodeURIComponent).join('/')}`:'';
+const safeUrl=u=>/^https?:\/\/[^\s"'<>]+$/i.test(String(u||'').trim())?String(u).trim():'';
+const ytId=u=>{const m=String(u||'').match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/);return m?m[1]:''};
+const sbGet=path=>fetch(`${SB.url}/rest/v1/${path}`,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}}).then(r=>r.ok?r.json():[]).catch(()=>[]);
+const rerender=()=>{const y=scrollY;route();scrollTo(0,y);};
+// 公開してよい陣営情報（承認済み）を選挙ごとに読み込む
+const CAMP={},CAMPID={};
+function campsFor(name){
+  if(!sbOn())return [];const v=CAMP[name];
+  if(v===undefined){CAMP[name]='loading';sbGet(`public_campaigns?select=*&election_name=eq.${encodeURIComponent(name)}`).then(a=>{CAMP[name]=Array.isArray(a)?a:[];a.forEach&&a.forEach(k=>CAMPID[k.id]=k);rerender();});return [];}
+  return Array.isArray(v)?v:[];
+}
+const campOf=(e,dn,nm)=>e?campsFor(e.name).find(k=>(k.district||'全域')===dn&&nz(k.candidate_name)===nz(nm)):null;
+const kav=(k,nm)=>k&&k.photo_path?`<img class="av" src="${esc(photoUrl(k.photo_path))}" alt="${esc(nm)}の写真" loading="lazy">`:av({n:nm,col:'#8a94a6'});
+// 陣営の公開ページ（#k-ID）
+function kpage(id){
+  if(!sbOn())return home();
+  const k=CAMPID[id];
+  if(k===undefined){CAMPID[id]=null;sbGet(`public_campaigns?select=*&id=eq.${encodeURIComponent(id)}`).then(a=>{CAMPID[id]=a&&a[0]?a[0]:false;route();});}
+  if(!k)return `<div class="wrap band"><p class="meta">${k===false?'このページは見つかりませんでした。':'読み込み中…'}</p></div>`;
+  const e=E.find(x=>x.name===k.election_name),yt=ytId(k.youtube),sns=String(k.sns||'').split('\n').map(safeUrl).filter(Boolean);
+  return `<div class="wrap prof"><div class="crumb"><a href="#home">トップ</a>${e?` ＞ <a href="#${e.id}">${esc(e.name)}</a>`:''} ＞ ${esc(k.candidate_name)}</div>
+  <div class="ptop"><h1>${esc(k.candidate_name)}</h1>${kav(k,k.candidate_name)}${k.catch_copy?`<div class="bub">${esc(k.catch_copy)}</div>`:''}</div>
+  <table class="info"><tr><th>選挙</th><td>${e?`<a href="#${e.id}">${esc(e.name)}</a>（${fmt(e.date)}）`:esc(k.election_name)}</td></tr>
+   ${k.district&&k.district!=='全域'?`<tr><th>選挙区</th><td>${esc(k.district)}</td></tr>`:''}${k.kata?`<tr><th>肩書</th><td>${esc(k.kata)}</td></tr>`:''}
+   <tr><th>情報</th><td><span class="tag">陣営確認済み</span> <span class="meta">この内容は候補者の陣営が登録しています</span></td></tr></table>
+  ${k.policy?`<section class="ps"><h2>政策・メッセージ</h2><p style="white-space:pre-wrap">${esc(k.policy)}</p></section>`:''}
+  ${k.activity?`<section class="ps"><h2>活動実績</h2><p style="white-space:pre-wrap">${esc(k.activity)}</p></section>`:''}
+  ${sns.length||yt?`<section class="ps"><h2>SNS・動画</h2>${sns.length?`<ul>${sns.map(u=>`<li><a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(u)}</a></li>`).join('')}</ul>`:''}
+   ${yt?`<div class="video" style="aspect-ratio:16/9;padding:0"><iframe src="https://www.youtube-nocookie.com/embed/${yt}" title="動画" style="width:100%;height:100%;border:0" allowfullscreen loading="lazy"></iframe></div>`:''}</section>`:''}
+  <p class="src">最終更新 ${esc(String(k.updated_at||'').slice(0,10))}（陣営）。基本情報・得票は選挙管理委員会の発表に基づきます。</p></div>`;
+}
+// ログイン状態
+const ACC={ready:false,loading:false,user:null,my:null,adm:false,mail:'',sent:false};
+async function acctLoad(){
+  if(ACC.loading)return;ACC.loading=true;
+  try{const sb=await sbLoad();const {data:{session}}=await sb.auth.getSession();ACC.user=session?session.user:null;ACC.my=null;ACC.adm=false;
+    if(ACC.user){const r=await sb.from('campaigns').select('*').eq('id',ACC.user.id).maybeSingle();ACC.my=r.data||null;
+      const a=await sb.from('admins').select('user_id').eq('user_id',ACC.user.id).maybeSingle();ACC.adm=!!a.data;}
+  }catch(err){toast('ログイン機能を読み込めませんでした。時間をおいてお試しください');}
+  ACC.ready=true;ACC.loading=false;route();
+}
+const ST={pending:'本人確認中',approved:'承認済み',rejected:'お断り',suspended:'公開停止中'};
+function account(){
+  if(!sbOn())return editDemo();
+  if(!ACC.ready){acctLoad();return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ログイン</h1><p class="meta">読み込み中…</p></div>`;}
+  const head=t=>`<div class="wrap band" style="max-width:760px"><h1 style="font-size:clamp(26px,4vw,36px)">${t}</h1>`;
+  const out=ACC.user?`<p class="meta" style="margin-top:28px">${esc(ACC.user.email)} でログイン中　<button class="lnk" id="logout">ログアウト</button>${ACC.adm?'　<a href="#admin">運営画面へ</a>':''}</p>`:'';
+  if(!ACC.user)return head('陣営ログイン')+`<p>立候補予定者・候補者の陣営の方は、メールアドレスでログインして、写真や政策を掲載できます。パスワードは不要です。</p>
+   ${ACC.sent?`<form id="otpf" class="edit" style="display:block"><div class="fld"><label for="otp">${esc(ACC.mail)} に届いた6桁の確認コード</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></div><button class="btn blue">ログイン</button> <button type="button" class="btn ghost" id="resend">メールアドレスを入れ直す</button></form>`
+   :`<form id="lgf" class="edit" style="display:block"><div class="fld"><label for="lg-mail">メールアドレス</label><input id="lg-mail" type="email" autocomplete="email" required></div><button class="btn blue">確認コードを送る</button></form>`}
+   <p class="meta">初めての方も同じ手順です。ログイン後に陣営の登録をお願いします。</p></div>`;
+  const m=ACC.my;
+  if(!m){const names=[...new Set(E.filter(e=>!e.ap&&days(e.date)>=-30).map(e=>e.name))];
+    return head('陣営の登録')+`<p>運営が本人確認（お電話など）をしてから、候補者ページの編集ができるようになります。</p>
+    <form id="regf" class="edit" style="display:block">
+     <div class="fld"><label for="r-an">申込者のお名前</label><input id="r-an" required maxlength="40"></div>
+     <div class="fld"><label for="r-ro">候補者とのご関係</label><select id="r-ro"><option>候補者本人</option><option>陣営スタッフ</option><option>政党・後援会の担当者</option></select></div>
+     <div class="fld"><label for="r-ph">日中つながる電話番号（本人確認に使います。公開しません）</label><input id="r-ph" type="tel" autocomplete="tel" required maxlength="20"></div>
+     <div class="fld"><label for="r-cn">候補者名（届出・報道どおり）</label><input id="r-cn" required maxlength="40"></div>
+     <div class="fld"><label for="r-el">選挙名</label><input id="r-el" list="r-els" required maxlength="60" placeholder="例：茨城県議会議員選挙"><datalist id="r-els">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></div>
+     <div class="fld"><label for="r-di">選挙区（選挙区が1つだけの選挙は「全域」）</label><input id="r-di" value="全域" required maxlength="40"></div>
+     <label style="display:flex;gap:8px;align-items:flex-start;margin:12px 0"><input type="checkbox" id="r-ok" required style="margin-top:6px"><span>候補者本人、または本人から依頼を受けた者として申し込みます。虚偽の申し込みは削除します。</span></label>
+     <button class="btn blue">登録を申し込む</button></form>${out}</div>`;}
+  if(m.status!=='approved')return head('陣営の登録')+`<div class="notice"><strong>${ST[m.status]||m.status}</strong><br>${m.status==='pending'?'運営が本人確認をしています。ご登録の電話番号にご連絡することがあります。確認が終わると、ここで編集できるようになります。':m.status==='suspended'?'掲載を一時停止しています。運営からのご連絡をご確認ください。':'このお申し込みはお受けできませんでした。'}</div>
+   <table class="info"><tr><th>候補者</th><td>${esc(m.candidate_name)}</td></tr><tr><th>選挙</th><td>${esc(m.election_name)}（${esc(m.district)}）</td></tr><tr><th>申込者</th><td>${esc(m.applicant_name)}（${esc(m.applicant_role||'')}）</td></tr></table>${out}</div>`;
+  pv=m.plan;const lk=t=>`<span class="lock">${t}</span>`;
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1>
+  <p class="meta">${esc(m.candidate_name)}／${esc(m.election_name)}${m.district!=='全域'?' '+esc(m.district):''}／<b>${P[m.plan]}プラン</b>${m.plan!=='pre'?'　<a href="#plans">プランを変更する</a>':''}</p>
+  <div class="edit"><form id="ef">
+   <div class="fld"><label for="f-ph">写真（JPEG・PNG・WebP、5MBまで）</label><input id="f-ph" type="file" accept="image/jpeg,image/png,image/webp"></div>
+   <div class="fld"><label for="f-kata">肩書</label><input id="f-kata" maxlength="60" value="${esc(m.kata||'')}" placeholder="例：会社員、元市職員"></div>
+   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${m.plan==='free'?lk('スタンダード以上'):''}</label><input id="f-copy" maxlength="40" value="${esc(m.catch_copy||'')}" ${m.plan==='free'?'disabled':''}></div>
+   <div class="fld"><label for="f-pol">政策・メッセージ ${m.plan==='free'?lk('スタンダード以上'):m.plan==='std'?'<span class="meta">（2,000字まで）</span>':''}</label><textarea id="f-pol" ${m.plan==='free'?'disabled':''} ${m.plan==='std'?'maxlength="2000"':''}>${esc(m.policy||'')}</textarea></div>
+   <div class="fld"><label for="f-sns">SNSのURL（1行に1つ）${m.plan==='free'?lk('スタンダード以上'):''}</label><textarea id="f-sns" rows="3" ${m.plan==='free'?'disabled':''}>${esc(m.sns||'')}</textarea></div>
+   <div class="fld"><label for="f-act">活動実績 ${m.plan!=='pre'?lk('プレミアムのみ'):''}</label><textarea id="f-act" ${m.plan!=='pre'?'disabled':''}>${esc(m.activity||'')}</textarea></div>
+   <div class="fld"><label for="f-yt">YouTube動画のURL ${m.plan!=='pre'?lk('プレミアムのみ'):''}</label><input id="f-yt" value="${esc(m.youtube||'')}" placeholder="https://www.youtube.com/watch?v=..." ${m.plan!=='pre'?'disabled':''}></div>
+   <button class="btn blue">保存して公開</button> <a href="#k-${esc(m.id)}" class="btn ghost">公開ページを見る</a></form>
+   <div class="pv"><p class="meta" style="margin:12px 0 0">選挙ページ一覧での見え方</p><div id="prev"></div></div></div>${out}</div>`;
+}
+// 運営画面（#admin）
+let ADML=null;
+function admin(){
+  if(!sbOn())return home();
+  if(!ACC.ready){acctLoad();return `<div class="wrap band"><p class="meta">読み込み中…</p></div>`;}
+  if(!ACC.adm)return `<div class="wrap band"><h1 style="font-size:28px">運営画面</h1><p>運営のアカウントでログインしてください。</p><p><a href="#edit">ログインへ</a></p></div>`;
+  if(!ADML){ADML='loading';sbLoad().then(sb=>sb.from('campaigns').select('*').order('created_at',{ascending:false})).then(r=>{ADML=r.data||[];route();});}
+  const L=Array.isArray(ADML)?[...ADML].sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)):[];
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">運営画面：陣営の承認</h1>
+  <p class="meta">本人確認ができたら「承認済み」にしてください。候補者名・選挙名・選挙区は、サイトの表記（選挙ページの候補者名）と完全に同じにすると、その候補者の欄に表示されます。</p>
+  ${ADML==='loading'?'<p class="meta">読み込み中…</p>':L.length?'':'<p class="meta">まだ申し込みはありません。</p>'}
+  ${L.map(m=>`<form class="admf edit" data-id="${esc(m.id)}" style="display:block;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:12px 0">
+   <p style="margin:0 0 8px"><span class="tag ${m.status==='pending'?'hot':''}">${ST[m.status]||esc(m.status)}</span> <b>${esc(m.candidate_name)}</b>　<span class="meta">${esc(m.election_name)}／${esc(m.district)}｜申込 ${esc(String(m.created_at).slice(0,10))}</span></p>
+   <p class="meta" style="margin:0 0 8px">申込者：${esc(m.applicant_name)}（${esc(m.applicant_role||'')}）｜電話 ${esc(m.phone)}｜${esc(m.email||'')}</p>
+   <div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <label>状態<select name="status">${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k===m.status?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>プラン<select name="plan">${Object.entries(P).map(([k,v])=>`<option value="${k}" ${k===m.plan?'selected':''}>${v}</option>`).join('')}</select></label>
+    <label>候補者名<input name="candidate_name" value="${esc(m.candidate_name)}"></label>
+    <label>選挙名<input name="election_name" value="${esc(m.election_name)}"></label>
+    <label>選挙区<input name="district" value="${esc(m.district)}"></label></div>
+   <label style="display:block;margin-top:8px">運営メモ（陣営には見えません）<input name="admin_note" value="${esc(m.admin_note||'')}" style="width:100%"></label>
+   <button class="btn blue" style="margin-top:8px">保存</button> ${m.status==='approved'?`<a href="#k-${esc(m.id)}">公開ページ</a>`:''}</form>`).join('')}
+  <p class="meta" style="margin-top:28px">${esc(ACC.user.email)} でログイン中　<button class="lnk" id="logout">ログアウト</button></p></div>`;
+}
+async function acctSubmit(f){
+  const sb=await sbLoad();
+  try{
+    if(f.id==='lgf'){const mail=$('#lg-mail').value.trim();const {error}=await sb.auth.signInWithOtp({email:mail,options:{shouldCreateUser:true}});if(error)throw error;ACC.mail=mail;ACC.sent=true;toast('確認コードを送りました。メールをご確認ください');route();}
+    else if(f.id==='otpf'){const {error}=await sb.auth.verifyOtp({email:ACC.mail,token:$('#otp').value.trim(),type:'email'});if(error)throw error;ACC.sent=false;ACC.ready=false;acctLoad();}
+    else if(f.id==='regf'){const row={id:ACC.user.id,email:ACC.user.email,applicant_name:$('#r-an').value.trim(),applicant_role:$('#r-ro').value,phone:$('#r-ph').value.trim(),candidate_name:$('#r-cn').value.trim(),election_name:$('#r-el').value.trim(),district:$('#r-di').value.trim()||'全域'};
+      const {error}=await sb.from('campaigns').insert(row);if(error)throw error;toast('お申し込みを受け付けました');ACC.ready=false;acctLoad();}
+    else if(f.id==='ef'){const m=ACC.my,v=id=>{const x=$(id);return x&&!x.disabled?x.value.trim():null};
+      const up={kata:v('#f-kata'),catch_copy:v('#f-copy'),policy:v('#f-pol'),sns:v('#f-sns'),activity:v('#f-act'),youtube:v('#f-yt')};
+      const file=$('#f-ph').files[0];
+      if(file){if(file.size>5242880)throw new Error('写真は5MBまでです');const ext=(file.type.split('/')[1]||'jpg').replace('jpeg','jpg');const path=`${m.id}/${Date.now()}.${ext}`;
+        const r=await sb.storage.from('photos').upload(path,file,{contentType:file.type});if(r.error)throw r.error;if(m.photo_path)sb.storage.from('photos').remove([m.photo_path]);up.photo_path=path;}
+      const {data,error}=await sb.from('campaigns').update(up).eq('id',m.id).select().single();if(error)throw error;ACC.my=data;delete CAMP[data.election_name];delete CAMPID[data.id];toast('保存して公開しました');route();}
+    else if(f.classList.contains('admf')){const fd=new FormData(f),up={};fd.forEach((x,k)=>up[k]=String(x).trim());
+      const {data,error}=await sb.from('campaigns').update(up).eq('id',f.dataset.id).select().single();if(error)throw error;ADML=ADML.map(x=>x.id===data.id?data:x);delete CAMP[data.election_name];toast('保存しました');rerender();}
+  }catch(err){toast('うまくいきませんでした：'+(err&&err.message||err));}
+}
 function route(){
   const h=location.hash.slice(1)||'home',app=$('#app');
   const e=E.find(x=>x.id===h);
-  app.innerHTML=h==='plans'?plans():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
+  app.innerHTML=h==='plans'?plans():h==='edit'?account():h==='admin'?admin():h.startsWith('k-')?kpage(h.slice(2)):h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
   document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(['plans','edit','search'].includes(h)?h:'home')));
-  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
+  document.title=(h==='admin'?'運営画面':h.startsWith('k-')&&CAMPID[h.slice(2)]?CAMPID[h.slice(2)].candidate_name:e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
   if(h==='edit')renderPrev();
   window.scrollTo(0,0);closeD();
 }
@@ -465,6 +599,8 @@ function closeD(){const d=$('#drawer');d.hidden=true;$('#mbtn').setAttribute('ar
 document.addEventListener('click',ev=>{
   const g=ev.target.closest('[data-go]');if(g){const t=document.getElementById(g.dataset.go);if(t)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
   const s=ev.target.closest('#seg button');if(s){pv=s.dataset.p;route();}
+  if(ev.target.closest('#logout')){sbLoad().then(sb=>sb.auth.signOut()).finally(()=>{Object.assign(ACC,{ready:false,user:null,my:null,adm:false,sent:false});ADML=null;location.hash==='#edit'?route():location.hash='edit';});return;}
+  if(ev.target.closest('#resend')){ACC.sent=false;route();return;}
   if(ev.target.closest('#mbtn')){const d=$('#drawer');d.hidden=!d.hidden;$('#mbtn').setAttribute('aria-expanded',String(!d.hidden));return;}
   const to=ev.target.closest('[data-to]');if(to){ev.preventDefault();const go=()=>{const t=document.getElementById(to.dataset.to);if(t)t.scrollIntoView();};if((location.hash.slice(1)||'home')!=='home'){location.hash='home';setTimeout(go,50);}else{closeD();go();}return;}
   const m=ev.target.closest('[data-m]');if(m){calM=m.dataset.m;const y=scrollY;route();scrollTo(0,y);return;}
@@ -472,15 +608,18 @@ document.addEventListener('click',ev=>{
   const tb=ev.target.closest('[data-t]');if(tb){qt=tb.dataset.t;if(!location.hash.startsWith('#search'))q='';location.hash==='#search'?route():location.hash='search';return;}
 });
 document.addEventListener('input',ev=>{if(ev.target.closest('#ef'))renderPrev();});
+document.addEventListener('change',ev=>{if(ev.target.id==='f-ph')renderPrev();});
 document.addEventListener('submit',ev=>{ev.preventDefault();
   if(ev.target.id==='zipf'){const raw=$('#zip').value.trim();const v=raw.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,'');
     if(v.length===7){lookupZip(v);}else if(raw&&!/^[\d０-９\-ー－\s]+$/.test(raw)){q=raw;qt='';location.hash==='#search'?route():location.hash='search';}else{toast('郵便番号を7桁で入力してください（市区町村名でも探せます）');}}
   else if(ev.target.id==='sf'){q=$('#sq').value;route();}
   else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('会員登録は準備中です');}
+  else if(sbOn()&&(['lgf','otpf','regf','ef'].includes(ev.target.id)||ev.target.classList.contains('admf')))acctSubmit(ev.target);
   else toast('保存機能は準備中です');
 });
 addEventListener('hashchange',route);
-route();
+// メールのリンクからログインしたとき（URLにトークンが付いている）は、読み取ってから編集画面へ
+if(sbOn()&&/access_token=|error_description=/.test(location.hash)){sbLoad().then(sb=>sb.auth.getSession()).finally(()=>{history.replaceState(null,'',location.pathname+'#edit');route();});}else route();
 // 開票速報中の選挙があれば、5分ごとにページを読み込み直して最新の数字を表示する
 if(E.some(e=>resOf(e)==='速報'))setInterval(()=>{if(document.visibilityState!=='hidden')location.reload()},300000);
 }
