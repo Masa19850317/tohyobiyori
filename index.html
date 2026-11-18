@@ -219,7 +219,7 @@ const typeOf=n=>n.includes('知事')?'知事':/[都道府県]議会/.test(n)&&!/
 const SRC27='選挙ナビ（senkyonavi.jp）「2027年の選挙日程」掲載情報（2026年11月17日時点）';
 let ri=0;
 (RAW+'\n'+RAW2).split('\n').forEach(l=>{const [d,k,n,p,m]=l.split('|');const ap=d.length===7;const muni=n.match(/^(.+?[市区町村])(長|議会)/);const x=EX[n]||{};
- E.push({id:'r'+(++ri),name:n,dist:'',pref:p+(muni&&!/[都道府県]議会/.test(n.replace(/[市町村]議会/,''))?' '+muni[1]:''),date:ap?d+'-15':d,ap:ap?k.slice(1):'',mk:m==='見込み',kokuji:ap?'':(k.length>5?k:d.slice(0,5)+k),seats:x.seats||null,type:typeOf(n),cands:[],
+ E.push({id:'r'+(++ri),name:n,dist:'',pref:p+(muni&&!/[都道府県]議会/.test(n.replace(/[市町村]議会/,''))?' '+muni[1]:''),date:ap?d+'-15':d,ap:ap?k.slice(1):'',mk:m==='見込み',kokuji:ap?'':(k.length>5?k:d.slice(0,5)+k),seats:x.seats||(/知事|長選挙/.test(n)?1:null),type:typeOf(n),cands:[],
   src:x.src||(d<'2027'?'各選挙管理委員会の公表日程（2026年11月17日時点で確認）':n.includes('北九州')?'北九州市選挙管理委員会の決定（2026年7月21日、報道による）':SRC27),
   note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
