@@ -34,7 +34,7 @@ button{cursor:pointer}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 html{scroll-padding-top:72px}
 .wrap{max-width:1040px;margin:0 auto;padding:0 max(4vw,16px)}
-.band{padding:clamp(28px,4vw,56px) 0}
+.band{padding-block:clamp(28px,4vw,56px)}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 .hd{display:flex;align-items:center;gap:12px;height:60px}
 .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px;color:var(--ink);text-decoration:none}
@@ -294,9 +294,9 @@ function home(){
     <g transform="rotate(-8 245 170)"><rect x="222" y="132" width="46" height="62" rx="4" fill="#ffffff" stroke="#14213a" stroke-width="2"/><path d="M232 150h26M232 162h26M232 174h16" stroke="#9aa6bd" stroke-width="3" stroke-linecap="round"/></g>
    </svg></div></section>
   <div class="wrap"><div class="fc">
-   <div><b>${d}日</b><span>次の投票日まで（${fmt(next.date)}）</span></div>
-   <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}に投票の選挙</span></div>
-   <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの予定</span></div></div></div>
+   <div><b>${d}日</b><span>次の投票日（${fmt(next.date).slice(5)}）まで</span></div>
+   <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}投票の選挙</span></div>
+   <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの選挙</span></div></div></div>
 
   <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
    <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
