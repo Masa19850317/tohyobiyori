@@ -112,6 +112,16 @@ table{border-collapse:collapse;width:100%}
 .hist td{padding:12px 4px;border-bottom:1px solid var(--line)}
 .hist td:last-child{text-align:right;white-space:nowrap}
 .win{color:var(--coral);font-weight:700}
+.nmrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.vt{margin-left:auto;font-weight:700;font-size:17px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.vt small{font-size:13px;font-weight:700;color:var(--sub);margin-right:6px}
+.vt.none{font-weight:500;color:var(--sub);font-size:14px}
+.vt .win{margin-right:6px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--coral)}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--coral);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}}
+.vstat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:6px 0 4px;font-size:14px;color:var(--sub)}
 .sns{display:flex;gap:10px;flex-wrap:wrap}
 .sns span{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700}
 .video{aspect-ratio:16/9;border-radius:14px;background:linear-gradient(135deg,var(--skyd),var(--sky));display:grid;place-items:center;color:#fff;font-weight:700}
@@ -156,6 +166,32 @@ table{border-collapse:collapse;width:100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{min-height:40px;padding:0 14px;font-size:14px}
 .chips button.smp{border-color:var(--sun);background:light-dark(#fff6d8,#2a2410)}
+.pick{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--ink);margin-bottom:16px}
+.pick:hover h3{text-decoration:underline}
+.pick .pkv{background:#14213a;color:#fff;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.pick .pkv b{font:900 clamp(34px,5vw,48px)/1 "Zen Maru Gothic";color:var(--sun)}
+.pick .pkv span{font:900 clamp(20px,3vw,26px)/1.3 "Zen Maru Gothic"}
+.pick>div:last-child{padding:18px 20px}
+.pick h3{font-size:20px;margin:8px 0}
+.artp{max-width:720px;margin:0 auto;padding:28px max(4vw,16px) 56px}
+.artp .crumb{font-size:13px;color:var(--sub)}
+.artp .crumb a{color:var(--sub)}
+.artp h1{font-size:clamp(26px,4vw,36px);font-weight:900;margin:12px 0}
+.artp h2{font-size:22px;margin:36px 0 12px;padding-left:10px;border-left:5px solid var(--sun)}
+.artp p{margin:0 0 14px}
+.artp .lead{font-size:18px;font-weight:500}
+.artp table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:15px}
+.artp th,.artp td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+.artp th{background:var(--soft);white-space:nowrap}
+.artp ul{padding-left:1.2em;margin:0 0 14px}
+.artp .note{font-size:14px;color:var(--sub);background:var(--soft);border-radius:12px;padding:12px 14px}
+.artp .src{font-size:14px}
+.artp .src li{margin-bottom:4px}
+@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal}}
+.topnews{display:flex;align-items:center;gap:10px;padding:10px max(4vw,16px);background:#14213a;color:#fff;text-decoration:none;font-weight:700;font-size:14px;line-height:1.4}
+.topnews .tag{flex:none}
+.topnews span:last-child{margin-left:auto;flex:none;color:var(--sun)}
+.topnews:hover b{text-decoration:underline}
 .news{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .art{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-align:left;padding:0;color:var(--ink);cursor:pointer}
 .art svg{display:block;width:100%;height:auto}
@@ -196,7 +232,7 @@ footer a{color:#fff}
 <div id="drawer" hidden><div class="dr-in">
  <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="news">選挙ニュース</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
 </div></div>
-<div class="demo">プロトタイプ：選挙日程は<span id="upd">2026年11月17日</span>時点で公表・報道されている実際の予定です（2027年分は見込みを含みます）。「あおば県」の選挙とその候補者は、ページの見本用の架空データです</div>
+<a class="topnews" href="#a-uscr"><span class="tag hot">特集</span><b>史上初の米中露首脳会談「平和宣言」で何が決まった？</b><span aria-hidden="true">›</span></a>
 <main id="app"></main>
 <footer><div class="wrap band">
   <div class="logo" style="color:#fff">投票日和</div>
@@ -225,6 +261,34 @@ let ri=0;
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
  note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
 const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt]=x.split('|');return {nm,age,p,st,nt}}):null}})};
+
+/* 得票数：votes.json を読み込み、投票日の夜は60秒ごとに再取得して表示を更新する */
+let VOTES={};
+const vOf=(e,dn)=>{const x=VOTES[e.name];if(!x||(x.date&&x.date!==e.date))return null;return (x.dist||{})[dn]||null};
+const jstToday=()=>new Date(Date.now()+9*36e5).toISOString().slice(0,10);
+const isVoteNight=e=>{const t=jstToday(),y=new Date(Date.parse(t)-864e5).toISOString().slice(0,10);return e.date===t||e.date===y};
+const hm=t=>{const d=new Date(t);return isNaN(d)?'':`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`};
+function vStat(e,d){
+  const v=vOf(e,d.n);
+  if(!v)return `<div class="vstat">${days(e.date)>0?'得票数は投票日の夜、開票にあわせて随時掲載します。':isVoteNight(e)?'<span class="live">開票速報</span>開票が始まりしだい得票数を掲載します。':'開票結果は確認中です。'}</div>`;
+  const fin=v.status==='final';
+  return `<div class="vstat">${fin?'<span class="tag">開票結果（確定）</span>':'<span class="live">開票速報</span>'}<span>${v.at?hm(v.at)+' 時点':''}${v.rate?`　開票率 ${esc(v.rate)}`:''}</span>${v.src?`<span>出典：${esc(v.src)}</span>`:''}</div>`;
+}
+function vCell(e,d,nm){
+  const v=vOf(e,d.n),n=v&&v.v?v.v[nm]:null,w=v&&(v.win||[]).includes(nm);
+  if(n==null)return '<span class="vt none">得票 —</span>';
+  return `<span class="vt">${w?`<span class="win">${v.status==='final'?'当選':'当選確実'}</span>`:''}<small>得票</small>${Number(n).toLocaleString()}票</span>`;
+}
+let vTimer=null,vSig='';
+function loadVotes(){
+  if(typeof fetch!=='function')return;
+  fetch('votes.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
+    if(!j||!j.elections)return;const sig=JSON.stringify(j.elections);if(sig===vSig)return;vSig=sig;VOTES=j.elections;
+    const h=location.hash.slice(1)||'home',e=E.find(x=>x.id===h);
+    if(e){const y=window.scrollY;$('#app').innerHTML=election(e);window.scrollTo(0,y);}
+  }).catch(()=>{});
+}
+function watchVotes(e){if(vTimer)clearInterval(vTimer);vTimer=null;if(e&&isVoteNight(e)&&typeof setInterval==='function')vTimer=setInterval(loadVotes,60000);}
 const distTxt=e=>{const d=DIST[e.name];return d?d.list.replace(/\|\d+/g,''):''};
 
 const when=e=>e.ap?`${e.date.slice(0,4)}年${e.ap}`:fmt(e.date)+(e.mk?'（見込み）':'');
@@ -298,6 +362,7 @@ function home(){
    <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}投票の選挙</span></div>
    <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの選挙</span></div></div></div>
 
+  <section class="wrap" style="padding-top:clamp(20px,3vw,32px)"><a class="pick" href="#a-uscr"><div class="pkv" aria-hidden="true"><b>史上初</b><span>米・中・露<br>首脳会談</span></div><div><span class="tag hot">特集・国際ニュース</span><h3>史上初の米中露首脳会談　「平和宣言」で何が決まった？</h3><p class="meta" style="margin:0 0 6px">核リスクの対話継続、国連改革、ICCのけん制、石油精製品の増産。宣言の中身と残る課題を解説します。</p><span class="meta">2026/11/19</span></div></a></section>
   <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
    <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
    <div class="sec-h" style="margin-top:32px"><h2 style="font-size:20px">候補者ページの見本</h2><span class="meta">架空の選挙・候補者です</span></div>
@@ -351,20 +416,20 @@ function candRow(id,e,i){
    ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><a class="more" href="#${id}">この候補者の政策・活動を見る</a>`:
    `<div class="freeinfo"><a href="#${id}">基本情報を見る</a><span>運営調べ・陣営未登録</span></div>`}</div>${i===1?ad('広告（候補者一覧の2人目のあと）'):''}`;
 }
-function candRows(d){
-  return d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><h3 style="font-size:19px">${esc(c.nm)}</h3><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
+function candRows(d,e){
+  return vStat(e,d)+d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><div class="nmrow"><h3 style="font-size:19px">${esc(c.nm)}</h3>${vCell(e,d,c.nm)}</div><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}</div></div>`).join('')
    +`<p class="meta">${d.off?'届出順。選挙管理委員会への立候補届出に基づきます。':'立候補予定者（告示前・報道に基づく）。正式な候補者は告示日の届出後に更新します。'}</p><p class="src">出典：${esc(d.src)}</p>`;
 }
 function distBlock(e){
   const ds=distOf(e);if(!ds)return '';const D=DIST[e.name];
   if(ds.length===1){const d=ds[0];
     return `<section style="margin:20px 0" id="d-0"><h2 style="font-size:22px">定数・候補者</h2><div class="kv" style="margin:8px 0"><span><b>区域</b>${esc(d.a)}</span><span><b>定数</b>${d.s}</span>${d.c?`<span><b>候補者数</b>${d.c.length}人${d.c.length>d.s?`（${(d.c.length/d.s).toFixed(2)}倍）`:''}</span>`:''}</div>
-    ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
+    ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d,e):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
   return `<section style="margin:20px 0"><h2 style="font-size:22px">選挙区・定数</h2><p class="meta">${esc(D.total)}。${esc(D.stat||'')}</p>
   <div class="scroll"><table class="cmp dtab"><tr><th>選挙区</th><th>区域（市町村）</th><th>定数</th><th>${ds.some(d=>d.off)?'候補者':'立候補予定者'}</th></tr>
   ${ds.map((d,i)=>`<tr><td>${d.c?`<button class="lnk" data-go="d-${i}">${esc(d.n)}</button>`:esc(d.n)}</td><td>${esc(d.a)}</td><td>${d.s}</td><td>${d.c?`${d.c.length}人${d.c.length>d.s?`<span class="meta">（${(d.c.length/d.s).toFixed(2)}倍）</span>`:''}`:'<span class="meta">調査中</span>'}</td></tr>`).join('')}</table></div>
   <p class="src">${esc(D.src)}</p>
-  ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d)}</div>`:'').join('')}
+  ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d,e)}</div>`:'').join('')}
   </section>`;
 }
 function election(e){
@@ -411,6 +476,83 @@ function cand(id){
   </div>`;
 }
 const feats=[['名前・年齢・党派・肩書などの基本情報','運営掲載','○','○'],['得票履歴（公的な開票結果）','○','○','○'],['陣営による情報の修正','○','○','○'],['顔写真','1枚','1枚','3枚まで'],['キャッチコピー吹き出し（一覧にも表示）','-','○','○'],['プロフィール・略歴','-','○','○'],['政策・メッセージ','-','2,000字','無制限・画像可'],['SNSリンク','-','○','○'],['活動実績','-','-','○'],['YouTube動画の埋め込み','-','-','○'],['閲覧数レポート','-','-','○'],['自分のページの広告を非表示','-','-','○'],['一覧での表示順','届出順','届出順','届出順']];
+
+function artUSCR(){
+  return `<article class="artp">
+  <p class="crumb"><a href="#home">トップ</a> ／ <a href="#home" data-to="news">選挙ニュース・ガイド</a> ／ 国際ニュース</p>
+  <span class="tag hot">国際ニュース</span>
+  <h1>史上初の米中露首脳会談　「平和宣言」で何が決まった？</h1>
+  <p class="meta">2026年11月19日（日本時間夜）時点の報道に基づく｜投票日和 編集部</p>
+  <p class="lead">11月19日、中国・深圳で、トランプ米大統領、習近平国家主席、プーチン露大統領による史上初の3か国首脳会談が開かれました。会談は約1時間半で、3か国は「平和宣言」と題する共同宣言をまとめました。</p>
+
+  <h2>概要</h2>
+  <table><tbody>
+   <tr><th>日時</th><td>2026年11月19日 午後（現地時間）</td></tr>
+   <tr><th>場所</th><td>中国・広東省深圳（APEC首脳会議に合わせて開催）</td></tr>
+   <tr><th>出席者</th><td>トランプ米大統領、習近平国家主席、プーチン露大統領</td></tr>
+   <tr><th>会談時間</th><td>約1時間半</td></tr>
+   <tr><th>成果文書</th><td>共同宣言「平和宣言」</td></tr>
+  </tbody></table>
+
+  <h2>「平和宣言」のポイント</h2>
+  <p>最大の成果は、核戦争を否定する原則の再確認と、核リスクをめぐる対話の継続で一致したことです。宣言の内容は、主に中国国営メディア（新華社・CCTV）の報道に基づきます。</p>
+  <table><thead><tr><th>分野</th><th>宣言の内容</th></tr></thead><tbody>
+   <tr><th>核</th><td>「核戦争に勝者はなく、決して戦ってはならない」との原則を再確認。核リスクの低減と核拡散の防止に向けた対話を続ける</td></tr>
+   <tr><th>国連</th><td>安保理常任理事国として、国連改革の推進に尽力する</td></tr>
+   <tr><th>国際法</th><td>国家の当局者の免責特権を尊重。国際刑事裁判所（ICC）などが管轄権を乱用してはならないとの認識で一致</td></tr>
+   <tr><th>エネルギー</th><td>石油精製品の生産と供給を増やす計画で一致</td></tr>
+  </tbody></table>
+
+  <h2>3首脳の発言</h2>
+  <ul>
+   <li><b>トランプ氏：</b>冒頭で核軍縮の重要性と「3大核保有国」の責任を強調。一方で「手放すことは容易でない」とも述べた。会談後は帰国の途に就いた</li>
+   <li><b>習氏：</b>3か国で世界の平和と安定を守るべきだと述べ、会談を「前向きで建設的、実りあるもの」と評価</li>
+   <li><b>プーチン氏：</b>ウクライナを含む地域紛争の解決で3か国に共通の利益があると発言。会談後は「非常に有益だった」と述べた</li>
+  </ul>
+
+  <h2>なぜ「史上初」なのか</h2>
+  <p>世界の3大核保有国の首脳が、正式な3者会談として一堂に会するのは初めてです。核弾頭の保有数はロシアが最多で、米国、中国が続きます（ストックホルム国際平和研究所）。</p>
+  <p>背景には、米露に残る唯一の核軍縮合意「新START」が2026年2月に失効したことがあります。米国は、核戦力を増強する中国も加えた3か国の枠組みを目指しています。一部の報道は、1945年のヤルタ会談になぞらえて「新ヤルタ会談」とも呼びました。</p>
+
+  <h2>評価と課題</h2>
+  <p>中露の首脳は成果を強調しました。ただし宣言は対話の継続を約束したもので、具体的な軍縮の取り決めは含まれていません。</p>
+  <p><b>前向きに評価する声</b></p>
+  <ul>
+   <li>3大核保有国の首脳が、核戦争を否定する原則をそろって確認した</li>
+   <li>核リスクをめぐる3か国の対話の入口ができた</li>
+  </ul>
+  <p><b>慎重・批判的な声</b></p>
+  <ul>
+   <li>具体的な軍縮の枠組みは示されず、中国の核戦力が米露より小さいことが軍縮合意をなお難しくしているとの専門家の指摘</li>
+   <li>ウクライナの外相は会談前、「当事国抜きの決定は不可能」と表明していた</li>
+   <li>自由主義陣営を率いてきた米国が中露に接近することへの戸惑い。米ウォール・ストリート・ジャーナル紙の社説は開催に反対していた</li>
+  </ul>
+
+  <h2>今後の注目点</h2>
+  <ul>
+   <li>核リスクの対話が、実務レベルの協議として始まるか</li>
+   <li>米政府が宣言の内容をどう説明するか（現時点の報道は中国国営メディアが中心）</li>
+   <li>ウクライナやイラン情勢をめぐり、会談後に各国の動きが変わるか</li>
+   <li>石油精製品の増産が、実際に市場へ影響するか</li>
+  </ul>
+  <p class="note">この記事は2026年11月19日夜（日本時間）時点の報道をもとにまとめています。新しい発表があれば更新します。</p>
+
+  <h2>出典</h2>
+  <ul class="src">
+   <li><a href="https://news.yahoo.co.jp/articles/2188adaf894ae044538daeb0851b4bc5d64c589f" target="_blank" rel="noopener">産経新聞「米中露が初の首脳会談で共同宣言」</a></li>
+   <li><a href="https://news.yahoo.co.jp/articles/28510b99ed05c58cb09c489de79b5416ace65f50" target="_blank" rel="noopener">産経新聞「米中露首脳会談は約1時間半で終了」</a></li>
+   <li><a href="https://news.yahoo.co.jp/articles/9e30a21a349dae109c1b80e6c0648044a7c33ca3" target="_blank" rel="noopener">CNN.co.jp「米中ロの3首脳が会談」</a></li>
+   <li><a href="https://news.web.nhk/newsweb/na/nd-20261119de78117" target="_blank" rel="noopener">NHK「米中ロ3か国が『平和宣言』」</a></li>
+   <li><a href="https://www.france24.com/en/asia-pacific/20261119-xi-trump-putin-talks-live-china-us-russia-leaders-hold-landmark-three-way-meeting" target="_blank" rel="noopener">France 24（英語）</a></li>
+   <li><a href="https://ground.news/article/trump-xi-and-putin-pledge-un-reforms-increased-fuel-supplies-and-nuclear-dialogue-at-historic-meeting_e51b4b" target="_blank" rel="noopener">Ground News（英語）</a></li>
+   <li><a href="https://www.cnn.com/2026/11/13/politics/trump-putin-xi-meeting" target="_blank" rel="noopener">CNN（英語）</a></li>
+   <li><a href="https://www.aljazeera.com/news/2026/11/14/trump-xi-and-putin-to-hold-first-three-way-summit-in-china" target="_blank" rel="noopener">Al Jazeera（英語）</a></li>
+   <li><a href="https://www.adn.com/nation-world/2026/11/14/trump-xi-and-putin-plan-unprecedented-joint-meeting-white-house-and-kremlin-say/" target="_blank" rel="noopener">AP通信（英語）</a></li>
+   <li><a href="https://theconversation.com/xi-trump-putin-summit-when-great-powers-want-to-call-all-the-shots-what-does-it-mean-for-everyone-else-296811" target="_blank" rel="noopener">The Conversation（英語）</a></li>
+  </ul>
+  <p style="margin-top:28px"><a class="btn" href="#home" data-to="news">選挙ニュース・ガイドへ戻る</a></p>
+  </article>`;
+}
 function plans(){
   return `<div class="wrap band"><h1 style="font-size:clamp(28px,4vw,40px)">陣営の方へ：掲載プラン</h1>
   <p class="meta" style="max-width:40em">基本情報は、選挙管理委員会の告示などをもとに運営が全候補者を無料で掲載します。有料プランでは、陣営が自分の言葉で伝えられる範囲が広がります。表示順はどのプランでも届出順で、料金によって変わりません。</p>
@@ -484,10 +626,11 @@ function area(){
 function route(){
   const h=location.hash.slice(1)||'home',app=$('#app');
   const e=E.find(x=>x.id===h);
-  app.innerHTML=h==='plans'?plans():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
+  app.innerHTML=h==='a-uscr'?artUSCR():h==='plans'?plans():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
   document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(['plans','edit','search'].includes(h)?h:'home')));
-  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
+  document.title=(e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='a-uscr'?'史上初の米中露首脳会談　「平和宣言」で何が決まった？':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
   if(h==='edit')renderPrev();
+  watchVotes(e);
   window.scrollTo(0,0);closeD();
 }
 function closeD(){const d=$('#drawer');d.hidden=true;$('#mbtn').setAttribute('aria-expanded','false')}
@@ -510,7 +653,8 @@ document.addEventListener('submit',ev=>{ev.preventDefault();
   else toast('保存しました（プロトタイプのため実際には保存されません）');
 });
 addEventListener('hashchange',route);
-try{document.getElementById('upd').textContent=fmt(UPDATED)}catch(e){}
+loadVotes();
+
 route();
 }
 </script>
