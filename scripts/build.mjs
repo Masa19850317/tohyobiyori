@@ -175,7 +175,7 @@ ${ms.length?`<h2 style="font-size:22px;margin-top:24px">市区町村から選ぶ
   sm.push([abs(pu),'0.7']);
   for(const m of ms){
     const mu=muniUrl(p,m),its=[...items,[m,mu]];const a=upFirst(byMuni[p+'|'+m]);const pp=prefLevel(p).filter(x=>!past(x));
-    const types=[...new Set(a.map(e=>short(e.name).replace(m,'')))].join('・');
+    const types=[...new Set(a.map(e=>short(e.name).replace(m.slice(0,-1),'')))].join('・');
     const b=`<div class="wrap">${crumb(its)}
 <h1>${esc(m)}の選挙（${esc(p)}）</h1>
 <p>${esc(p)}${esc(m)}の${esc(types)}の日程・定数・候補者です。${esc(m)}の有権者が投票する${esc(p)}全体の選挙もあわせて載せています。</p>
