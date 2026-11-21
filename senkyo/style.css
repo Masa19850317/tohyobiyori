@@ -1,0 +1,205 @@
+/* VOICE: friendly civic guide, clear and fair, like a good local newspaper on a sunny morning
+   IDEA: a weather forecast for voting day — "today is a fine day to vote"
+   PICTURE: sun rising over a town with a ballot box; countdown to the vote like a forecast
+   COLOUR and TYPE: deep sky blue dominant, sun yellow support, coral accent; Zen Maru Gothic + Noto Sans JP
+   LAYOUT: sticky header, hero band, card lists, candidate pages in one calm column */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0e1626);--ink:light-dark(#14213a,#eef2fa);--sub:light-dark(#56627a,#a9b4c9);
+--sky:light-dark(#1d5fd0,#3d7ef0);--skyd:light-dark(#0f3f94,#1b3f86);--sun:#ffc93c;--coral:light-dark(#e2553a,#ff7a5c);
+--line:light-dark(#dde3ee,#26324a);--soft:light-dark(#eef4ff,#152240);--card:light-dark(#fff,#121d33)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 "Noto Sans JP",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.logo{font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif;line-height:1.2;text-wrap:balance;margin:0}
+a{color:var(--sky)}
+button,input,textarea,select{font:inherit;font-size:16px}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+html{scroll-padding-top:72px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 max(4vw,16px)}
+.band{padding-block:clamp(28px,4vw,56px)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:22px;color:var(--ink);text-decoration:none}
+.logo small{font-size:11px;font-weight:700;color:var(--sub)}
+.hd nav{margin-left:auto;display:flex;gap:4px}
+.hd nav a{padding:10px 12px;border-radius:999px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:700}
+.hd nav a.on,.hd nav a:hover{background:var(--soft)}
+.hero{background:var(--sky);color:#fff;overflow:hidden}
+.hgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:center}
+.hero h1{font-size:clamp(32px,5vw,50px);font-weight:900}
+.hero p{color:#e3ecff;max-width:30em}
+.zip{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.zip input{flex:1 1 180px;min-height:48px;border-radius:12px;border:0;padding:0 16px;color:#14213a;background:#fff}
+.btn{min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--sun);color:#14213a;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;gap:6px}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.blue{background:var(--sky);color:#fff}
+.scene{width:100%;height:auto;display:block}
+.fc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:-36px;position:relative}
+.fc div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 6px 20px #0f3f9414}
+.fc b{display:block;font:900 30px/1.1 "Zen Maru Gothic",sans-serif;color:var(--sky)}
+.fc span{font-size:13px;color:var(--sub)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.sec-h h2{font-size:26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.ecard{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .15s}
+.ecard:hover{transform:translateY(-2px);border-color:var(--sky)}
+.ecard h3{font-size:19px;margin:6px 0}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--sky);white-space:nowrap}
+.tag.hot{background:var(--coral);color:#fff}
+.tag.gray{background:light-dark(#5b6170,#3a4459);color:#fff}
+.meta{font-size:14px;color:var(--sub)}
+.ad{border:1px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--sub);font-size:13px;background:light-dark(#fafbfd,#101a2e);margin:16px 0}
+.ad b{display:block;font-size:11px;letter-spacing:0;color:var(--sub)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.steps div{background:var(--soft);border-radius:16px;padding:18px}
+.steps h3{font-size:18px;margin-bottom:6px}
+.cta{background:var(--skyd);color:#fff;border-radius:20px;padding:clamp(20px,4vw,36px);display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cta p{color:#d7e3ff;margin:6px 0 0}
+.crumb{font-size:13px;color:var(--sub);padding-top:16px}
+.crumb a{color:var(--sub)}
+.ehead{border-bottom:4px solid var(--sky);padding:16px 0 20px}
+.ehead h1{font-size:clamp(26px,4vw,38px);margin:8px 0}
+.kv{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px}
+.kv b{color:var(--sub);font-weight:500;margin-right:6px}
+.count{display:flex;align-items:center;gap:14px;background:var(--soft);border-radius:16px;padding:14px 18px;margin:16px 0}
+.count b{font:900 40px/1 "Zen Maru Gothic";color:var(--coral)}
+.cand{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line)}
+.av{width:110px;height:132px;border-radius:12px;display:block}
+.cand h3{font-size:24px}
+.kana{font-size:13px;color:var(--sub)}
+.row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:6px;font-size:15px}
+.votes{font-weight:700;margin-left:auto;font-size:18px;white-space:nowrap}
+.bub{grid-column:1/-1;position:relative;background:var(--sky);color:#fff;font:700 18px/1.5 "Zen Maru Gothic",sans-serif;padding:14px 18px;border-radius:14px;margin-top:6px}
+.bub::before{content:"";position:absolute;top:-10px;left:44px;border:10px solid transparent;border-top:0;border-bottom-color:var(--sky)}
+.more{grid-column:1/-1;text-align:center;font-weight:700}
+.freeinfo{grid-column:1/-1;font-size:13px;color:var(--sub);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.src{font-size:12px;color:var(--sub);margin-top:16px}
+.prof{max-width:760px;margin:0 auto}
+.ptop{text-align:center;padding:24px 0 8px}
+.ptop h1{font-size:clamp(30px,5vw,44px)}
+.ptop .av{width:180px;height:216px;margin:16px auto}
+.ptop .bub{text-align:left;font-size:20px}
+table{border-collapse:collapse;width:100%}
+.info td,.info th{border-bottom:1px solid var(--line);padding:14px 8px;text-align:left;vertical-align:top}
+.info th{width:7em;color:var(--sub);font-weight:500}
+.menu{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:20px 0}
+.menu button{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;text-align:left;padding:0 14px}
+.menu button:disabled{opacity:.45;cursor:default}
+.ps{margin-top:28px}
+.ps>h2{background:var(--sky);color:#fff;padding:14px 18px;border-radius:14px;font-size:22px}
+.ps h3{font-size:17px;border-left:5px solid var(--sun);padding-left:10px;margin:20px 0 8px}
+.ps p{margin:6px 0}
+.ps ul{padding-left:1.2em;margin:6px 0}
+.hist a{font-weight:700}
+.hist td{padding:12px 4px;border-bottom:1px solid var(--line)}
+.hist td:last-child{text-align:right;white-space:nowrap}
+.win{color:var(--coral);font-weight:700}
+.nmrow{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.vt{margin-left:auto;font-weight:700;font-size:17px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.vt small{font-size:13px;font-weight:700;color:var(--sub);margin-right:6px}
+.vt.none{font-weight:500;color:var(--sub);font-size:14px}
+.vt .win{margin-right:6px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--coral)}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--coral);animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}}
+.vstat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:6px 0 4px;font-size:14px;color:var(--sub)}
+.sns{display:flex;gap:10px;flex-wrap:wrap}
+.sns span{border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:700}
+.video{aspect-ratio:16/9;border-radius:14px;background:linear-gradient(135deg,var(--skyd),var(--sky));display:grid;place-items:center;color:#fff;font-weight:700}
+.notice{background:light-dark(#fff8e1,#2a2410);border:1px solid light-dark(#f1d27a,#6b5a20);border-radius:14px;padding:16px;margin:20px 0;font-size:14px}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+.plan{border:2px solid var(--line);border-radius:20px;padding:22px;background:var(--card)}
+.plan.rec{border-color:var(--sky);box-shadow:0 10px 30px #1d5fd022}
+.plan h3{font-size:22px}
+.price{font:900 34px/1.1 "Zen Maru Gothic";margin:10px 0 2px;white-space:nowrap}
+.price small{font-size:14px;font-weight:500;color:var(--sub)}
+.plan ul{padding-left:1.1em;font-size:14px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:10px 8px;font-size:14px}
+.cmp td{text-align:center}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.ok{color:var(--sky);font-weight:900}
+.edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.fld{margin-bottom:16px}
+.fld label{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.fld input,.fld textarea,.fld select{width:100%;min-height:48px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 12px}
+.fld textarea{min-height:110px}
+.lock{font-size:12px;color:var(--coral);font-weight:700;margin-left:6px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.seg button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
+.seg button.on{background:var(--sky);color:#fff;border-color:var(--sky)}
+.pv{position:sticky;top:76px;border:1px solid var(--line);border-radius:16px;padding:0 16px;background:var(--card)}
+.ic{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--ink);padding:0}
+.ic:hover{background:var(--soft)}
+#drawer{position:fixed;inset:60px 0 0 auto;width:min(320px,100%);background:var(--card);border-left:1px solid var(--line);z-index:6;box-shadow:-10px 0 30px #0002;overflow:auto}
+.dr-in a{display:block;padding:16px 20px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700}
+.dr-in a:hover{background:var(--soft)}
+.cal-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.cal-tabs button,.chips button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
+.cal-tabs button.on,.chips button.on{background:var(--sky);border-color:var(--sky);color:#fff}
+.cal a{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 4px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.cal a:hover{background:var(--soft)}
+.cal .dt{font:900 26px/1 "Zen Maru Gothic";color:var(--sky);text-align:center;white-space:nowrap}
+.cal .dt small{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-top:4px}
+.cal strong{display:block;font-size:17px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start}
+.reg{display:grid;gap:14px}
+.reg h3{font-size:15px;color:var(--sub);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:40px;padding:0 14px;font-size:14px}
+.chips button.smp{border-color:var(--sun);background:light-dark(#fff6d8,#2a2410)}
+.pick{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--ink);margin-bottom:16px}
+.pick:hover h3{text-decoration:underline}
+.pick .pkv{background:#14213a;color:#fff;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.pick .pkv b{font:900 clamp(34px,5vw,48px)/1 "Zen Maru Gothic";color:var(--sun)}
+.pick .pkv span{font:900 clamp(20px,3vw,26px)/1.3 "Zen Maru Gothic"}
+.pick>div:last-child{padding:18px 20px}
+.pick h3{font-size:20px;margin:8px 0}
+.artp{max-width:720px;margin:0 auto;padding:28px max(4vw,16px) 56px}
+.artp .crumb{font-size:13px;color:var(--sub)}
+.artp .crumb a{color:var(--sub)}
+.artp h1{font-size:clamp(26px,4vw,36px);font-weight:900;margin:12px 0}
+.artp h2{font-size:22px;margin:36px 0 12px;padding-left:10px;border-left:5px solid var(--sun)}
+.artp p{margin:0 0 14px}
+.artp .lead{font-size:18px;font-weight:500}
+.artp table{width:100%;border-collapse:collapse;margin:8px 0 16px;font-size:15px}
+.artp th,.artp td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+.artp th{background:var(--soft);white-space:nowrap}
+.artp ul{padding-left:1.2em;margin:0 0 14px}
+.artp .note{font-size:14px;color:var(--sub);background:var(--soft);border-radius:12px;padding:12px 14px}
+.artp .src{font-size:14px}
+.artp .src li{margin-bottom:4px}
+@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal}}
+.topnews{display:flex;align-items:center;gap:10px;padding:10px max(4vw,16px);background:#14213a;color:#fff;text-decoration:none;font-weight:700;font-size:14px;line-height:1.4}
+.topnews .tag{flex:none}
+.topnews span:last-child{margin-left:auto;flex:none;color:var(--sun)}
+.topnews:hover b{text-decoration:underline}
+.news{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.art{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-align:left;padding:0;color:var(--ink);cursor:pointer}
+.art svg{display:block;width:100%;height:auto}
+.art div{padding:12px 14px 16px}
+.art h3{font-size:16px;margin:6px 0}
+.upd{list-style:none;padding:0;margin:0}
+.upd a{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.upd .av{width:48px;height:58px;border-radius:8px}
+.upd b{display:block}
+.join{background:var(--sun);border-radius:20px;padding:clamp(20px,4vw,36px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:center;color:#14213a}
+.join h2{font-size:26px}
+.join form{display:grid;gap:8px}
+.join input{min-height:48px;border-radius:12px;border:0;padding:0 14px;background:#fff;color:#14213a}
+.join .btn{background:#14213a;color:#fff}
+.sr{position:absolute;left:-9999px}
+.res-h{font-size:18px;margin:24px 0 8px}
+.cand .av{flex:none}
+#app [id^=d-] .av{width:56px;height:67px;border-radius:8px}
+.lnk{background:none;border:0;padding:0;color:var(--sky);font-weight:700;text-decoration:underline;cursor:pointer;text-align:left}
+.dtab td:nth-child(3){text-align:center}.dtab td:nth-child(2){text-align:left}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+footer{background:var(--skyd);color:#d7e3ff;margin-top:48px;font-size:14px}
+footer a{color:#fff}
+.demo{font-size:12px;color:var(--sub);text-align:center;padding:8px}
+@media(max-width:760px){.hgrid,.edit,.plans,.two,.join{grid-template-columns:minmax(0,1fr)}.steps{grid-template-columns:minmax(0,1fr)}.pv{position:static}.hd nav a.opt{display:none}}
+@media(max-width:600px){.fc{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px}.fc b{font-size:22px}.fc div{padding:12px}.cand{grid-template-columns:84px minmax(0,1fr)}.av{width:84px;height:100px}.cand h3{font-size:20px}.votes{margin-left:0}.logo small{display:none}.cmp{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.ecard,.toast{transition:none}}

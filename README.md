@@ -10,6 +10,8 @@
 | `index.html` | 画面（トップ、検索、選挙ページ、候補者ページ、掲載プラン、陣営の編集画面） |
 | `data.js` | 選挙データ。毎日の自動更新はこのファイルだけを書き換えます |
 | `votes.json` | 得票数・開票速報。投票日の夜はこのファイルを更新します |
+| `scripts/build.mjs` | 選挙ごとの静的ページ作成。`node scripts/build.mjs` で `senkyo/`（選挙ごとのページと一覧）と `sitemap.xml` を作り直します。data.js や index.html を変えたら実行してから commit します |
+| `senkyo/` | build.mjs が作る選挙ごとのページ（`/senkyo/投票年/選挙名/`）。検索エンジン向け。手で編集しない |
 | `scripts/check.mjs` | データ確認。`node scripts/check.mjs` で全ページを描画してエラーがないか確認します |
 | `.nojekyll` | GitHub Pages でそのまま配信するための空ファイル |
 
