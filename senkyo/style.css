@@ -45,6 +45,10 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px so
 .ecard{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .15s}
 .ecard:hover{transform:translateY(-2px);border-color:var(--sky)}
 .ecard h3{font-size:19px;margin:6px 0}
+.rlist{list-style:none;margin:10px 0 0;padding:0}
+.rlist li{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.rlist .vt{font-size:16px}
+.rlist li>span:first-child{flex:1;min-width:0}
 .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--sky);white-space:nowrap}
 .tag.hot{background:var(--coral);color:#fff}
 .tag.gray{background:light-dark(#5b6170,#3a4459);color:#fff}

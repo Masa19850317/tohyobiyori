@@ -65,6 +65,10 @@ header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px so
 .ecard{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;transition:transform .15s}
 .ecard:hover{transform:translateY(-2px);border-color:var(--sky)}
 .ecard h3{font-size:19px;margin:6px 0}
+.rlist{list-style:none;margin:10px 0 0;padding:0}
+.rlist li{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.rlist .vt{font-size:16px}
+.rlist li>span:first-child{flex:1;min-width:0}
 .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--sky);white-space:nowrap}
 .tag.hot{background:var(--coral);color:#fff}
 .tag.gray{background:light-dark(#5b6170,#3a4459);color:#fff}
@@ -261,23 +265,28 @@ let ri=0;
   note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
  note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
-const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt]=x.split('|');return {nm,age,p,st,nt}}):null}})};
+const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v,w}}):null}})};
 
 /* 得票数：votes.json を読み込み、投票日の夜は60秒ごとに再取得して表示を更新する */
 let VOTES={};
-const vOf=(e,dn)=>{const x=VOTES[e.name];if(!x||(x.date&&x.date!==e.date))return null;return (x.dist||{})[dn]||null};
+const vOf=(e,dn)=>{const x=VOTES[e.name];if(x&&(!x.date||x.date===e.date)&&x.dist&&x.dist[dn])return x.dist[dn];return dVote(e,dn)};
+/* data.js の DIST（cands[選挙区].res と候補者行末の |得票数|当）からも得票数を読む */
+const dVote=(e,dn)=>{const D=DIST[e.name],c=D&&D.cands&&D.cands[dn];if(e.smp||!c||!c.res)return null;const r=c.res,rows=(c.c||'').split('\n').map(x=>x.split('|')),v={};
+  rows.forEach(a=>{if(a[5]!=null&&a[5]!==''&&!isNaN(+a[5]))v[a[0]]=+a[5]});
+  return {status:r.st==='確定'?'final':'counting',at:r.at?r.at.replace(' ','T')+':00+09:00':'',rate:r.rate||'',turnout:r.turnout||'',src:r.src||'',v,win:rows.filter(a=>a[6]==='当').map(a=>a[0])}};
 const jstToday=()=>new Date(Date.now()+9*36e5).toISOString().slice(0,10);
 const isVoteNight=e=>{const t=jstToday(),y=new Date(Date.parse(t)-864e5).toISOString().slice(0,10);return e.date===t||e.date===y};
-const hm=t=>{const d=new Date(t);return isNaN(d)?'':`${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`};
+const hm=t=>{const d=new Date(Date.parse(t)+9*36e5);return isNaN(d)?'':`${d.getUTCMonth()+1}/${d.getUTCDate()} ${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2,'0')}`};
 function vStat(e,d){
   const v=vOf(e,d.n);
   if(!v)return `<div class="vstat">${days(e.date)>0?'得票数は投票日の夜、開票にあわせて随時掲載します。':isVoteNight(e)?'<span class="live">開票速報</span>開票が始まりしだい得票数を掲載します。':'開票結果は確認中です。'}</div>`;
   const fin=v.status==='final';
-  return `<div class="vstat">${fin?'<span class="tag">開票結果（確定）</span>':'<span class="live">開票速報</span>'}<span>${v.at?hm(v.at)+' 時点':''}${v.rate?`　開票率 ${esc(v.rate)}`:''}</span>${v.src?`<span>出典：${esc(v.src)}</span>`:''}</div>`;
+  return `<div class="vstat">${fin?'<span class="tag">開票結果（確定）</span>':'<span class="live">開票速報</span>'}<span>${v.at?hm(v.at)+' 時点':''}${v.rate?`　開票率 ${esc(v.rate)}`:''}${v.turnout?`　投票率 ${esc(v.turnout)}`:''}</span>${v.src?`<span>出典：${esc(v.src)}</span>`:''}</div>`;
 }
 function vCell(e,d,nm){
   const v=vOf(e,d.n),n=v&&v.v?v.v[nm]:null,w=v&&(v.win||[]).includes(nm);
-  if(n==null)return '<span class="vt none">得票 —</span>';
+  const wl=w?`<span class="win">${v.status==='final'?'当選':'当選確実'}</span>`:'';
+  if(n==null)return w?`<span class="vt">${wl}<small>得票 —</small></span>`:'<span class="vt none">得票 —</span>';
   return `<span class="vt">${w?`<span class="win">${v.status==='final'?'当選':'当選確実'}</span>`:''}<small>得票</small>${Number(n).toLocaleString()}票</span>`;
 }
 let vTimer=null,vSig='';
@@ -286,7 +295,7 @@ function loadVotes(){
   fetch('votes.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
     if(!j||!j.elections)return;const sig=JSON.stringify(j.elections);if(sig===vSig)return;vSig=sig;VOTES=j.elections;
     const h=location.hash.slice(1)||'home',e=E.find(x=>x.id===h);
-    if(e){const y=window.scrollY;$('#app').innerHTML=election(e);window.scrollTo(0,y);}
+    if(e){const y=window.scrollY;$('#app').innerHTML=election(e);window.scrollTo(0,y);}else if(h==='home'){const y=window.scrollY;$('#app').innerHTML=home();window.scrollTo(0,y);}
   }).catch(()=>{});
 }
 function watchVotes(e){if(vTimer)clearInterval(vTimer);vTimer=null;if(e&&isVoteNight(e)&&typeof setInterval==='function')vTimer=setInterval(loadVotes,60000);}
@@ -313,8 +322,35 @@ function ecard(e){
   <h3>${esc(e.name)}${e.dist?`<br><small style="font-size:14px">${esc(e.dist)}</small>`:''}</h3>
   <div class="meta">${esc(e.pref)}｜投票日 ${when(e)}${e.count?`｜${e.count}件`:''}${e.seats?`｜定数 ${e.seats}`:''}${e.cands.length?`｜候補者 ${e.cands.length+(e.others||0)}人`:''}</div></a>`;
 }
+/* トップの「開票結果」：投票日の夜から7日間、開票速報・結果が出ている選挙を載せる */
+const RES_DAYS=7,TORD=['国政','知事','都道府県議','市区町村長','市区町村議'];
+function recentResults(){
+  const t=jstToday(),lo=new Date(Date.parse(t)-RES_DAYS*864e5).toISOString().slice(0,10);
+  return E.filter(e=>!e.smp&&!e.ap&&e.date<=t&&e.date>=lo).map(e=>{const vs=(distOf(e)||[]).map(d=>({d,v:vOf(e,d.n)})).filter(x=>x.v);return {e,vs}}).filter(x=>x.vs.length)
+   .sort((a,b)=>b.e.date.localeCompare(a.e.date)||TORD.indexOf(a.e.type)-TORD.indexOf(b.e.type)||a.e.name.localeCompare(b.e.name,'ja'));
+}
+function rcard({e,vs}){
+  const fin=vs.every(x=>x.v.status==='final'),v0=vs[0].v,multi=(distOf(e)||[]).length>1;
+  const wins=vs.flatMap(({d,v})=>(d.c||[]).filter(c=>(v.win||[]).includes(c.nm)).map(c=>({c,n:v.v?v.v[c.nm]:null,f:v.status==='final'})));
+  const seats=vs.reduce((a,x)=>a+(x.d.s||0),0);
+  let body='';
+  if(multi){body=`<p class="meta" style="margin:4px 0">${vs.length}選挙区で結果を掲載中／当選 ${wins.length}人</p>`;}
+  else if(seats<=3){const {d,v}=vs[0];const rows=(d.c||[]).map(c=>({c,n:v.v?v.v[c.nm]:null,w:(v.win||[]).includes(c.nm)})).sort((a,b)=>(b.w-a.w)||((b.n??-1)-(a.n??-1)));
+    body=`<ul class="rlist">${rows.map(r=>`<li><span>${r.w?`<span class="win">${v.status==='final'?'当選':'当選確実'}</span> `:''}<b>${esc(r.c.nm)}</b> <span class="meta">${esc(r.c.p||'')}${r.c.st?'・'+esc(r.c.st):''}</span></span><span class="vt${r.n==null?' none':''}">${r.n==null?'得票 —':Number(r.n).toLocaleString()+'票'}</span></li>`).join('')}</ul>`;}
+  else{const nm=wins.slice(0,8).map(w=>esc(w.c.nm)).join('、');
+    body=`<p style="margin:6px 0"><b>当選 ${wins.length}人</b><span class="meta">／定数 ${seats}</span></p>${wins.length?`<p class="meta" style="margin:0">${nm}${wins.length>8?` ほか${wins.length-8}人`:''}</p>`:'<p class="meta" style="margin:0">当選者は確認中です。</p>'}`;}
+  return `<a class="ecard" href="#${e.id}">${fin?'<span class="tag">開票結果（確定）</span>':'<span class="live">開票速報</span>'}
+  <h3>${esc(e.name)}${e.dist?` <small style="font-size:14px">${esc(e.dist)}</small>`:''}</h3>
+  <div class="meta">${esc(e.pref)}｜${fmt(e.date)}投票${!multi&&v0.turnout?`｜投票率 ${esc(v0.turnout)}`:''}${!fin&&!multi&&v0.rate?`｜開票率 ${esc(v0.rate)}`:''}${v0.at?`｜${hm(v0.at)} 時点`:''}</div>${body}</a>`;
+}
+function resultsBlock(){
+  const rs=recentResults();if(!rs.length)return '';
+  return `<section class="wrap band" id="results"><div class="sec-h"><h2>開票結果</h2><span class="meta">直近${RES_DAYS}日間の投開票</span></div>
+   <div class="grid">${rs.map(rcard).join('')}</div>
+   <p class="src">出典：各選挙管理委員会の開票結果、報道各社の開票速報（各選挙のページに記載）。当選確実は報道による速報です。</p></section>`;
+}
 function home(){
-  const up=E.filter(e=>!e.done&&!e.smp&&days(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
+  const up=E.filter(e=>!e.done&&!e.smp&&e.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
   const months=[...new Set(up.map(e=>e.date.slice(0,7)))];if(!months.includes(calM))calM=months[0];
   const wk='日月火水木金土';
   return `<section class="hero"><div class="wrap band hgrid">
@@ -337,6 +373,7 @@ function home(){
    <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}投票の選挙</span></div>
    <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの選挙</span></div></div></div>
 
+  ${resultsBlock()}
   <section class="wrap" style="padding-top:clamp(20px,3vw,32px)"><a class="pick" href="#a-uscr"><div class="pkv" aria-hidden="true"><b>史上初</b><span>米・中・露<br>首脳会談</span></div><div><span class="tag hot">特集・国際ニュース</span><h3>史上初の米中露首脳会談　「平和宣言」で何が決まった？</h3><p class="meta" style="margin:0 0 6px">核リスクの対話継続、国連改革、ICCのけん制、石油精製品の増産。宣言の中身と残る課題を解説します。</p><span class="meta">2026/11/19</span></div></a></section>
   <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
    <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
@@ -418,7 +455,7 @@ function election(e){
   return `<div class="wrap"><div class="crumb"><a href="#home">トップ</a> ＞ ${esc(e.pref)}</div>
   <div class="ehead"><span class="tag">${esc(e.pref)}</span><h1>${esc(e.name)}${e.dist?` ${esc(e.dist)}`:''}</h1>
    <div class="kv"><span><b>投票日</b>${when(e)}</span><span><b>告示日</b>${e.kokuji?fmt(e.kokuji)+(e.mk?'（見込み）':''):'未定'}</span>${e.seats?`<span><b>定数</b>${e.seats}</span>`:''}${e.cands.length?`<span><b>候補者数</b>${e.cands.length+(e.others||0)}人</span>`:''}<span><b>種類</b>${esc(e.type)}</span></div></div>
-  ${e.done||e.ap?'':`<div class="count"><b>${Math.max(d,0)}</b><div><strong>投票日まであと${Math.max(d,0)}日</strong><br><span class="meta">期日前投票は告示日の翌日から。投票所はお住まいの選挙管理委員会のサイトで確認できます。</span></div></div>`}
+  ${e.done||e.ap||e.date<jstToday()?'':`<div class="count"><b>${Math.max(d,0)}</b><div><strong>投票日まであと${Math.max(d,0)}日</strong><br><span class="meta">期日前投票は告示日の翌日から。投票所はお住まいの選挙管理委員会のサイトで確認できます。</span></div></div>`}
   ${e.note?`<p>${esc(e.note)}</p>`:''}
   ${distBlock(e)}
   ${prevBlock(e)}
