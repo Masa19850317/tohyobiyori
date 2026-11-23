@@ -8,7 +8,7 @@ const app=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(
 const el=()=>({innerHTML:'',textContent:'',hidden:true,classList:{add(){},remove(){},toggle(){}},setAttribute(){},dataset:{},value:'',scrollIntoView(){}});
 const ctx={document:{querySelector:el,querySelectorAll:()=>[],addEventListener(){},getElementById:el,title:''},location:{hash:''},addEventListener(){},window:{scrollTo(){}},scrollTo(){},matchMedia:()=>({matches:false}),MutationObserver:class{observe(){}},console};
 vm.createContext(ctx);
-const test=`;const out=[home(),plans(),edit(),search()];E.forEach(e=>out.push(election(e)));
+const test=`;const out=[home(),plans(),apply(),terms(),tokusho(),edit(),search()];E.forEach(e=>out.push(election(e)));
 const bad=out.filter(h=>/undefined|NaN/.test(h));
 const seen={};const dup=E.filter(e=>!e.smp&&(seen[e.name+e.date]=(seen[e.name+e.date]||0)+1)>1).map(e=>e.name);
 for(const [k,d] of Object.entries(DIST)){if(!E.some(e=>e.name===k))console.log('警告: DISTの選挙名が日程にない:',k);
