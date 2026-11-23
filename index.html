@@ -274,9 +274,9 @@ const P={free:'フリー',pre:'陣営プラン'};
 // form: 申込内容の送信先（Formspree などの受付URL）。空のときはメール（mail）に申込内容を下書きします。
 // stripe: 区分ごとの Stripe 支払いリンク（初期費用＋月額サブスクを1つのリンクに入れる）。空の区分はカード払いを選べません。
 // seller: 特定商取引法に基づく表記。open を true にする前に必ず記入します。
-const SALES={open:false,form:'',mail:'',
+const SALES={open:true,form:'',mail:'mob.record23@gmail.com',
  stripe:{kokusei:'',shucho:'',pref:'',seirei:'',tokubetsu:'',chukaku:'',shi:'',chouson:''},
- seller:{name:'',rep:'',addr:'',tel:'',mail:'',hours:'平日10時〜18時'}};
+ seller:{name:'投票日和運営事務局',rep:'上野真仁',addr:'〒315-0014 茨城県石岡市国府1-2-2',tel:'090-6040-1985',mail:'mob.record23@gmail.com',hours:'平日10時〜18時'}};
 const INIT=25000; // 初期費用（税抜）
 const TIERS=[['kokusei','国政（衆議院・参議院）',11300],['shucho','首長（知事・市区町村長）',9000],['pref','都道府県議会',9000],['seirei','政令指定都市の市議会',9000],['tokubetsu','東京23区の区議会',6000],['chukaku','中核市の市議会',6000],['shi','一般市の市議会',4800],['chouson','町議会・村議会',3300]];
 const yen=n=>n.toLocaleString('ja-JP')+'円',tax=n=>Math.round(n*1.1);
