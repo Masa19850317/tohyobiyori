@@ -470,14 +470,17 @@ function distBlock(e){
   ${ds.map((d,i)=>d.c?`<div id="d-${i}" style="margin-top:28px"><h3 style="font-size:20px;border-left:5px solid var(--sun);padding-left:10px">${esc(d.n)}選挙区 <span class="meta" style="font-size:14px;font-weight:400">定数${d.s}／${esc(d.a)}</span></h3>${candRows(d,e)}</div>`:'').join('')}
   </section>`;
 }
+function prevList(D){const p=D&&D.prev;if(!p)return [];return (Array.isArray(p)?p:[p]).filter(Boolean).slice().sort((x,y)=>(y.date||'').localeCompare(x.date||''));}
 function prevBlock(e){
-  const D=DIST[e.name],p=D&&D.prev;if(!p||e.smp)return '';
+  const L=prevList(DIST[e.name]);if(!L.length||e.smp)return '';
+  const one=(p,i)=>{
   const rows=p.c?p.c.split('\n').map(x=>{const [nm,age,pt,st,v,w]=x.split('|');return {nm,age,pt,st,v,w}}):[];
-  return `<section style="margin:24px 0"><h2 style="font-size:22px">前回の結果（${p.date?fmt(p.date):''}）</h2>
+  return `<div style="margin:${i?'20px':'8px'} 0 0">${L.length>1?`<h3 style="font-size:18px;margin:0 0 4px">${i===0?'前回':i===1?'前々回':(i+1)+'回前'}（${p.date?fmt(p.date):''}）</h3>`:''}
   <div class="kv" style="margin:8px 0">${p.turnout?`<span><b>投票率</b>${esc(p.turnout)}</span>`:''}${p.voters?`<span><b>有権者数</b>${esc(p.voters)}</span>`:''}</div>
   ${p.note?`<p>${esc(p.note)}</p>`:''}
   ${rows.length?`<table class="hist">${rows.map(r=>`<tr><td>${r.w?'<span class="win">当選</span> ':''}<b>${esc(r.nm)}</b> <span class="meta">${[r.age?r.age+'歳':'',r.pt,r.st].filter(Boolean).map(esc).join('・')}</span></td><td>${r.v?Number(r.v).toLocaleString()+' 票':'—'}</td></tr>`).join('')}</table>`:''}
-  <p class="src">出典：${esc(p.src||'')}</p></section>`;
+  <p class="src">出典：${esc(p.src||'')}</p></div>`;};
+  return `<section style="margin:24px 0"><h2 style="font-size:22px">${L.length>1?'過去の結果':`前回の結果（${L[0].date?fmt(L[0].date):''}）`}</h2>${L.map(one).join('')}</section>`;
 }
 function election(e){
   const d=days(e.date);

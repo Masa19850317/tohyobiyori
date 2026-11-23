@@ -125,7 +125,7 @@ function faq(e){
   qa.push([`${s}の投票日はいつですか？`,e.ap?`まだ決まっていません。${year(e)}年${e.ap}の見込みです。`:`${fmtw(e.date)}${e.mk?'（見込み）':''}${done?'に行われました':'です'}。${e.kokuji?`告示日は${fmtw(e.kokuji)}${e.mk?'（見込み）':''}です。`:''}`]);
   if(!e.ap&&e.kokuji&&e.kokuji<e.date&&!done)qa.push(['期日前投票はいつからできますか？',`告示日の翌日の${fmtw(addDay(e.kokuji,1))}から、投票日の前日の${fmtw(addDay(e.date,-1))}までです${e.mk?'（日程は見込み）':''}。期日前投票所の場所と時間は、選挙管理委員会のお知らせで確認してください。`]);
   if(e.seats)qa.push([`定数は何人ですか？`,`${e.seats}人です。`]);
-  const pv=DIST[e.name]&&DIST[e.name].prev;
+  const pv0=DIST[e.name]&&DIST[e.name].prev;const pv=Array.isArray(pv0)?pv0.slice().sort((x,y)=>(y.date||'').localeCompare(x.date||''))[0]:pv0;
   if(pv&&pv.date)qa.push([`前回の${s}はどうでしたか？`,`前回は${fmt(pv.date)}に行われました。${pv.turnout?`投票率は${pv.turnout}でした。`:''}${pv.note||''}`]);
   qa.push([`誰が立候補していますか？`,names.length?`${official?'届出のあった候補者':'報道などで立候補の意向が伝えられている人'}は、${names.slice(0,12).join('、')}${names.length>12?` ほか（計${names.length}人）`:''}です。${official?'':'告示日の届出で正式に決まります。'}`:`このサイトではまだ掲載していません。${e.kokuji?`告示日（${fmt(e.kokuji)}${e.mk?'・見込み':''}）の立候補届出後に掲載します。`:''}`]);
   if(local&&e.type!=='統一地方選（後半）')qa.push(['投票できるのはどんな人ですか？','日本国民で満18歳以上、その自治体に引き続き3か月以上住所がある人です。選挙人名簿に登録されている必要があります。']);
