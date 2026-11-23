@@ -11,7 +11,7 @@ vm.createContext(ctx);
 const test=`;const out=[home(),plans(),apply(),terms(),tokusho(),edit(),search(),columns(),...COLS.map(c=>c.f())];E.forEach(e=>out.push(election(e)));
 const bad=out.filter(h=>/undefined|NaN/.test(h));
 const seen={};const dup=E.filter(e=>!e.smp&&(seen[e.name+e.date]=(seen[e.name+e.date]||0)+1)>1).map(e=>e.name);
-for(const [k,d] of Object.entries(DIST)){if(!E.some(e=>e.name===k))console.log('警告: DISTの選挙名が日程にない:',k);
+for(const [k,d] of Object.entries(DIST)){if(!E.some(e=>e.name===k.replace(/@\\d{4}$/,'')))console.log('警告: DISTの選挙名が日程にない:',k);
  for(const [c,x] of Object.entries(d.cands||{}))if(x&&x.c)for(const r of x.c.split('\\n')){const f=r.split('|');if(f.length===6||f.length>7||(f.length===7&&(f[6]!==''&&f[6]!=='当'||f[5]!==''&&isNaN(+f[5]))))console.log('警告: 候補者行の列数・得票欄が不正（氏名|年齢|党派|新現元|備考|得票数|当）:',k,c,r);}
  for(const p of (d.prev?(Array.isArray(d.prev)?d.prev:[d.prev]):[])){if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(p.date||''))console.log('警告: 過去の結果の日付が不正:',k,p.date);if(!p.src)console.log('警告: 過去の結果に出典がない:',k,p.date);if(p.c)for(const r of p.c.split('\\n')){const f=r.split('|');if(f.length!==6||(f[5]!==''&&f[5]!=='当')||(f[4]!==''&&isNaN(+f[4])))console.log('警告: 過去の結果の列数・得票欄が不正（氏名|年齢|党派|新現元|得票数|当）:',k,p.date,r);}}
  for(const c of Object.keys(d.cands||{}))if(!(d.list||'').split('\\n').some(l=>l.split('|')[0]===c))console.log('警告: 候補者の選挙区名が一覧にない:',k,c);}

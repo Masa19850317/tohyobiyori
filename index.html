@@ -281,22 +281,27 @@ const INIT=25000; // 初期費用（税抜）
 const TIERS=[['kokusei','国政（衆議院・参議院）',11300],['shucho','首長（知事・市区町村長）',9000],['pref','都道府県議会',9000],['seirei','政令指定都市の市議会',9000],['tokubetsu','東京23区の区議会',6000],['chukaku','中核市の市議会',6000],['shi','一般市の市議会',4800],['chouson','町議会・村議会',3300]];
 const yen=n=>n.toLocaleString('ja-JP')+'円',tax=n=>Math.round(n*1.1);
 const E=[];
-const typeOf=n=>n.includes('知事')?'知事':/[都道府県]議会/.test(n)&&!/[市町村]議会/.test(n)?'都道府県議':n.includes('議会議員')?'市区町村議':'市区町村長';
+const LASTY=()=>E.reduce((a,e)=>e.date>a?e.date:a,'').slice(0,4);
+const typeOf=n=>/衆議院|参議院/.test(n)?'国政':n.includes('知事')?'知事':/[都道府県]議会/.test(n)&&!/[市町村]議会/.test(n)?'都道府県議':n.includes('議会議員')?'市区町村議':'市区町村長';
 const SRC27='選挙ナビ（senkyonavi.jp）「2027年の選挙日程」掲載情報（2026年11月17日時点）';
 let ri=0;
-(RAW+'\n'+RAW2).split('\n').forEach(l=>{const [d,k,n,p,m]=l.split('|');const ap=d.length===7;const muni=n.match(/^(.+?[市区町村])(長|議会)/);const x=EX[n]||{};
- E.push({id:'r'+(++ri),name:n,dist:'',pref:p+(muni&&!/[都道府県]議会/.test(n.replace(/[市町村]議会/,''))?' '+muni[1]:''),date:ap?d+'-15':d,ap:ap?k.slice(1):'',mk:m==='見込み',kokuji:ap?'':(k.length>5?k:d.slice(0,5)+k),seats:x.seats||(/知事|長選挙/.test(n)?1:null),type:typeOf(n),cands:[],
-  src:x.src||(d<'2027'?'各選挙管理委員会の公表日程（2026年11月17日時点で確認）':n.includes('北九州')?'北九州市選挙管理委員会の決定（2026年7月21日、報道による）':SRC27),
-  note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
+/* 同じ選挙名が複数年にあるとき：DIST・EX は '選挙名@YYYY' を優先し、無印のキーはいちばん早い回だけに使う */
+const FIRSTD={};(RAW+'\n'+RAW2).split('\n').forEach(l=>{const [d,,n]=l.split('|');if(n&&(!FIRSTD[n]||d<FIRSTD[n]))FIRSTD[n]=d;});
+const exOf=(n,d)=>EX[n+'@'+d.slice(0,4)]||(FIRSTD[n]===d?EX[n]:null)||{};
+(RAW+'\n'+RAW2).split('\n').forEach(l=>{const [d,k,n,p,m]=l.split('|');const ap=d.length===7;const muni=n.match(/^(.+?[市区町村])(長|議会)/);const x=exOf(n,d);
+ E.push({id:'r'+(++ri),rd:d,name:n,dist:'',pref:p+(muni&&!/[都道府県]議会/.test(n.replace(/[市町村]議会/,''))?' '+muni[1]:''),date:ap?d+'-15':d,ap:ap?k.slice(1):'',mk:m==='見込み',kokuji:ap?'':(k.length>5?k:d.slice(0,5)+k),seats:x.seats||(/知事|長選挙/.test(n)?1:null),type:typeOf(n),cands:[],
+  src:x.src||(d>='2028'?'前回の選挙の投票日と任期（4年）、選挙管理委員会の任期満了日一覧などから見込んだ時期':d<'2027'?'各選挙管理委員会の公表日程（2026年11月17日時点で確認）':n.includes('北九州')?'北九州市選挙管理委員会の決定（2026年7月21日、報道による）':SRC27),
+  note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?(d>='2028'?'任期満了の時期から見込んだ時期です。投票日・告示日は未定で、決まりしだい更新します。任期途中の辞職や解散があると時期が変わります。':'投票日・告示日は未定です。決まりしだい更新します。'):'')});});
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
  note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
-const distOf=e=>{const d=DIST[e.name];if(!d||!d.list||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v,w}}):null}})};
+const DD=e=>!e.rd?DIST[e.name]:(DIST[e.name+'@'+e.rd.slice(0,4)]||(FIRSTD[e.name]===e.rd?DIST[e.name]:undefined));
+const distOf=e=>{const d=DD(e);if(!d||!d.list||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v,w}}):null}})};
 
 /* 得票数：votes.json を読み込み、投票日の夜は60秒ごとに再取得して表示を更新する */
 let VOTES={};
 const vOf=(e,dn)=>{const x=VOTES[e.name];if(x&&(!x.date||x.date===e.date)&&x.dist&&x.dist[dn])return x.dist[dn];return dVote(e,dn)};
 /* data.js の DIST（cands[選挙区].res と候補者行末の |得票数|当）からも得票数を読む */
-const dVote=(e,dn)=>{const D=DIST[e.name],c=D&&D.cands&&D.cands[dn];if(e.smp||!c||!c.res)return null;const r=c.res,rows=(c.c||'').split('\n').map(x=>x.split('|')),v={};
+const dVote=(e,dn)=>{const D=DD(e),c=D&&D.cands&&D.cands[dn];if(e.smp||!c||!c.res)return null;const r=c.res,rows=(c.c||'').split('\n').map(x=>x.split('|')),v={};
   rows.forEach(a=>{if(a[5]!=null&&a[5]!==''&&!isNaN(+a[5]))v[a[0]]=+a[5]});
   return {status:r.st==='確定'?'final':'counting',at:r.at?r.at.replace(' ','T')+':00+09:00':'',rate:r.rate||'',turnout:r.turnout||'',src:r.src||'',v,win:rows.filter(a=>a[6]==='当').map(a=>a[0])}};
 const jstToday=()=>new Date(Date.now()+9*36e5).toISOString().slice(0,10);
@@ -324,7 +329,7 @@ function loadVotes(){
   }).catch(()=>{});
 }
 function watchVotes(e){if(vTimer)clearInterval(vTimer);vTimer=null;if(e&&isVoteNight(e)&&typeof setInterval==='function')vTimer=setInterval(loadVotes,60000);}
-const distTxt=e=>{const d=DIST[e.name];return d&&d.list?d.list.replace(/\|\d+/g,''):''};
+const distTxt=e=>{const d=DD(e);return d&&d.list?d.list.replace(/\|\d+/g,''):''};
 
 const when=e=>e.ap?`${e.date.slice(0,4)}年${e.ap}`:fmt(e.date)+(e.mk?'（見込み）':'');
 const TYPES=['国政','知事','都道府県議','市区町村長','市区町村議'];
@@ -380,7 +385,7 @@ function resultsBlock(){
 }
 function home(){
   const up=E.filter(e=>!e.done&&!e.smp&&e.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
-  const months=[...new Set(up.map(e=>e.date.slice(0,7)))];if(!months.includes(calM))calM=months[0];
+  const lim=(new Date().getFullYear()+1)+'-12';const months=[...new Set(up.map(e=>e.date.slice(0,7)<=lim?e.date.slice(0,7):e.date.slice(0,4)))];if(!months.includes(calM))calM=months[0];
   const wk='日月火水木金土';
   return `<section class="hero"><div class="wrap band hgrid">
    <div><h1>今度の日曜は、<br>投票日和。</h1>
@@ -400,7 +405,7 @@ function home(){
   <div class="wrap"><div class="fc">
    <div><b>${d}日</b><span>次の投票日（${fmt(next.date).slice(5)}）まで</span></div>
    <div><b>${nx.length}件</b><span>${fmt(next.date).slice(5)}投票の選挙</span></div>
-   <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>2027年末までの選挙</span></div></div></div>
+   <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>${LASTY()}年末までの選挙</span></div></div></div>
 
   ${resultsBlock()}
   <section class="wrap" style="padding-top:clamp(20px,3vw,32px)"><a class="pick" href="#a-uscr"><div class="pkv" aria-hidden="true"><b>史上初</b><span>米・中・露<br>首脳会談</span></div><div><span class="tag hot">特集・国際ニュース</span><h3>史上初の米中露首脳会談　「平和宣言」で何が決まった？</h3><p class="meta" style="margin:0 0 6px">核リスクの対話継続、国連改革、ICCのけん制、石油精製品の増産。宣言の中身と残る課題を解説します。</p><span class="meta">2026/11/19</span></div></a></section>
@@ -410,7 +415,7 @@ function home(){
 
   <section class="wrap band" style="padding-top:0"><div class="two">
    <div id="cal"><div class="sec-h"><h2>選挙カレンダー</h2></div>
-    <div class="cal-tabs">${months.map(m=>`<button data-m="${m}" class="${m===calM?'on':''}">${m.slice(2,4)}年${+m.slice(5)}月（${up.filter(e=>e.date.startsWith(m)).length}）</button>`).join('')}</div>
+    <div class="cal-tabs">${months.map(m=>`<button data-m="${m}" class="${m===calM?'on':''}">${m.length===4?m+'年':m.slice(2,4)+'年'+(+m.slice(5))+'月'}（${up.filter(e=>e.date.startsWith(m)).length}）</button>`).join('')}</div>
     <div class="cal">${up.filter(e=>e.date.startsWith(calM)).map(e=>{const dt=new Date(e.date+'T00:00:00+09:00');return `<a href="#${e.id}"><span class="dt">${e.ap?`${+e.date.slice(5,7)}月<small>ごろ</small>`:`${+e.date.slice(5,7)}/${+e.date.slice(8)}<small>${wk[dt.getDay()]}曜</small>`}</span><span><strong>${esc(e.name)}${e.dist?' '+esc(e.dist):''}</strong><span class="meta">${esc(e.pref)}｜${esc(e.type)}｜告示 ${e.kokuji?`${+e.kokuji.slice(5,7)}/${+e.kokuji.slice(8)}`:'未定'}${e.mk?'（見込み）':''}${e.count?`｜${e.count}件`:''}</span></span><span class="tag ${!e.ap&&days(e.date)<=30?'hot':''}">${e.ap?esc(e.ap):`あと${days(e.date)}日`}</span></a>`}).join('')}</div></div>
    <aside>${ad('広告 300×250')}</aside></div></section>
 
@@ -462,7 +467,7 @@ function candRows(d,e){
    +`<p class="meta">${d.off?'届出順。選挙管理委員会への立候補届出に基づきます。':'立候補予定者（告示前・報道に基づく）。正式な候補者は告示日の届出後に更新します。'}</p><p class="src">出典：${esc(d.src)}</p>`;
 }
 function distBlock(e){
-  const ds=distOf(e);if(!ds)return '';const D=DIST[e.name];
+  const ds=distOf(e);if(!ds)return '';const D=DD(e);
   if(ds.length===1){const d=ds[0];
     return `<section style="margin:20px 0" id="d-0"><h2 style="font-size:22px">定数・候補者</h2><div class="kv" style="margin:8px 0"><span><b>区域</b>${esc(d.a)}</span><span><b>定数</b>${d.s}</span>${d.c?`<span><b>候補者数</b>${d.c.length}人${d.c.length>d.s?`（${(d.c.length/d.s).toFixed(2)}倍）`:''}</span>`:''}</div>
     ${D.stat?`<p>${esc(D.stat)}</p>`:''}${d.c?candRows(d,e):'<p class="meta">候補者一覧は確認中です。</p>'}<p class="src">${esc(D.src)}</p></section>`;}
@@ -475,7 +480,7 @@ function distBlock(e){
 }
 function prevList(D){const p=D&&D.prev;if(!p)return [];return (Array.isArray(p)?p:[p]).filter(Boolean).slice().sort((x,y)=>(y.date||'').localeCompare(x.date||''));}
 function prevBlock(e){
-  const L=prevList(DIST[e.name]);if(!L.length||e.smp)return '';
+  const L=prevList(DD(e));if(!L.length||e.smp)return '';
   const one=(p,i)=>{
   const rows=p.c?p.c.split('\n').map(x=>{const [nm,age,pt,st,v,w]=x.split('|');return {nm,age,pt,st,v,w}}):[];
   return `<div style="margin:${i?'20px':'8px'} 0 0">${L.length>1?`<h3 style="font-size:18px;margin:0 0 4px">${i===0?'前回':i===1?'前々回':(i+1)+'回前'}（${p.date?fmt(p.date):''}）</h3>`:''}
@@ -494,7 +499,7 @@ function election(e){
   ${e.note?`<p>${esc(e.note)}</p>`:''}
   ${distBlock(e)}
   ${prevBlock(e)}
-  ${!e.cands.length&&!e.others&&!((distOf(e)||[]).some(d=>d.c)||(DIST[e.name]&&DIST[e.name].list&&e.kokuji&&days(e.kokuji)<=0))?`<div class="notice"><strong>候補者は告示日${e.kokuji?`（${fmt(e.kokuji)}${e.mk?'・見込み':''}）`:''}の立候補届出後に掲載します。</strong><br>立候補予定の陣営の方は、事前に陣営アカウントを作成しておくと、告示日当日から写真や政策を掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`:''}
+  ${!e.cands.length&&!e.others&&!((distOf(e)||[]).some(d=>d.c)||(DD(e)&&DD(e).list&&e.kokuji&&days(e.kokuji)<=0))?`<div class="notice"><strong>候補者は告示日${e.kokuji?`（${fmt(e.kokuji)}${e.mk?'・見込み':''}）`:''}の立候補届出後に掲載します。</strong><br>立候補予定の陣営の方は、事前に陣営アカウントを作成しておくと、告示日当日から写真や政策を掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`:''}
   ${!e.cands.length?ad():''}
   <h2 style="font-size:22px;margin-top:20px;${e.cands.length?'':'display:none'}">${e.done?'開票結果':'候補者'}<span class="meta" style="font-size:13px;font-weight:400">　届出順（全プラン共通）</span></h2>
   ${e.cands.map((id,i)=>candRow(id,e,i)).join('')}
@@ -807,14 +812,14 @@ function area(){
       let dn='';const ds=distOf(e);
       if(ds&&ds.length>1){const d=ds.find(d=>d.a.split('、').some(x=>x===mu||x===city));if(d)dn=d.n+'選挙区（定数'+d.s+'）';}
       hits.push({e,dn});
-    }else if(e.pref==='全国'&&e.id==='touitsu-late'){hits.push({e,dn:'あなたの市区町村も対象かは、市区町村の選挙管理委員会で確認できます'});}
+    }else if(e.pref==='全国'&&e.id==='touitsu-late'){hits.push({e,dn:'あなたの市区町村も対象かは、市区町村の選挙管理委員会で確認できます'});}else if(e.pref==='全国'&&e.type==='国政'&&!e.done){hits.push({e,dn:'全国で行われる国政選挙です'});}
   });
   hits.sort((a,b)=>a.e.date.localeCompare(b.e.date));
   const near=hits.filter(h=>h.e.pref!=='全国');
   return `<div class="wrap band"><div class="crumb"><a href="#home">トップ</a> ＞ あなたの選挙</div>
   <h1 style="font-size:clamp(26px,4vw,38px);margin-top:8px">${esc(pref)}${esc(city)}の選挙</h1>
   <p class="meta">〒${zip.slice(0,3)}-${zip.slice(3)}　${esc(pref+city+(town||''))}</p>
-  ${near.length?`<div class="count"><b>${near.length}</b><div><strong>2027年末までに予定されている選挙</strong><br><span class="meta">あなたの住所で投票できる選挙です（県の選挙と${esc(mu)}の選挙）。</span></div></div>`:`<div class="notice"><strong>${esc(pref+mu)}で、2027年末までに予定されている選挙は今のところ掲載されていません。</strong><br>日程が決まりしだい、毎日の更新で追加します。<a href="#search" data-q="${esc(pref)}">${esc(pref)}のほかの選挙を見る</a></div>`}
+  ${near.length?`<div class="count"><b>${near.length}</b><div><strong>${LASTY()}年末までに予定されている選挙</strong><br><span class="meta">あなたの住所で投票できる選挙です（県の選挙と${esc(mu)}の選挙）。</span></div></div>`:`<div class="notice"><strong>${esc(pref+mu)}で、${LASTY()}年末までに予定されている選挙は今のところ掲載されていません。</strong><br>日程が決まりしだい、毎日の更新で追加します。<a href="#search" data-q="${esc(pref)}">${esc(pref)}のほかの選挙を見る</a></div>`}
   <div style="display:grid;gap:12px">${hits.map(h=>`<div>${ecard(h.e)}${h.dn?`<p class="meta" style="margin:6px 4px 0">${h.e.pref==='全国'?'':'あなたの選挙区：'}${esc(h.dn)}</p>`:''}</div>`).join('')}</div>
   ${ad()}
   <p class="src">住所の判定：郵便番号検索API（zipcloud）。選挙区は市区町村単位で判定しています。政令市の区や一部の地域で選挙区が分かれる場合は、選挙管理委員会の案内をご確認ください。</p></div>`;
