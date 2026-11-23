@@ -207,7 +207,7 @@ table{border-collapse:collapse;width:100%}
 .artp .note{font-size:14px;color:var(--sub);background:var(--soft);border-radius:12px;padding:12px 14px}
 .artp .src{font-size:14px}
 .artp .src li{margin-bottom:4px}
-@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal}}
+@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal;min-width:6.5em}}
 .topnews{display:flex;align-items:center;gap:10px;padding:10px max(4vw,16px);background:#14213a;color:#fff;text-decoration:none;font-weight:700;font-size:14px;line-height:1.4}
 .topnews .tag{flex:none}
 .topnews span:last-child{margin-left:auto;flex:none;color:var(--sun)}
@@ -248,12 +248,12 @@ footer a{color:#fff}
 <body>
 <header><div class="wrap hd">
   <a class="logo" href="#home"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="13" r="7" fill="#ffc93c"/><g stroke="#ffc93c" stroke-width="2.4" stroke-linecap="round"><path d="M15 1v3M3 13h3M24 13h3M6.5 4.5l2 2M23.5 4.5l-2 2"/></g><rect x="5" y="18" width="20" height="11" rx="2" fill="#1d5fd0"/><rect x="11" y="19.5" width="8" height="2" rx="1" fill="#fff"/></svg>投票日和<small>とうひょうびより</small></a>
-  <nav><a href="#home" data-n="home" class="opt">選挙をさがす</a><a href="#plans" data-n="plans" class="opt">陣営の方へ</a>
+  <nav><a href="#home" data-n="home" class="opt">選挙をさがす</a><a href="#column" data-n="column" class="opt">コラム</a><a href="#plans" data-n="plans" class="opt">陣営の方へ</a>
    <a href="#search" data-n="search" class="ic" aria-label="検索"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></a>
    <button class="ic" id="mbtn" aria-label="メニュー" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></nav>
 </div></header>
 <div id="drawer" hidden><div class="dr-in">
- <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="news">選挙ニュース</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
+ <a href="#home">トップ</a><a href="#search">選挙・候補者を検索</a><a href="#home" data-to="cal">選挙カレンダー</a><a href="#home" data-to="pref">都道府県から探す</a><a href="#home" data-to="news">選挙ニュース</a><a href="#column">コラム</a><a href="#home" data-to="join">無料会員登録</a><a href="#plans">陣営の方へ（掲載プラン）</a><a href="#edit">陣営ログイン</a>
 </div></div>
 <a class="topnews" href="#a-uscr"><span class="tag hot">特集</span><b>史上初の米中露首脳会談「平和宣言」で何が決まった？</b><span aria-hidden="true">›</span></a>
 <main id="app"><div class="wrap"><h1>投票日和（とうひょうびより）</h1><p>「今日は、投票日和。」を合言葉に、全国の選挙日程・選挙区・定数・候補者を毎日更新する選挙情報サイトです。知事選・都道府県議選・市区町村長選・市区町村議選の日程と候補者、開票結果を掲載しています。郵便番号で、あなたが投票できる選挙がすぐわかります。</p><p><a href="/senkyo/">全国の選挙の一覧を見る</a></p></div></main>
@@ -422,6 +422,9 @@ function home(){
 
   <section class="wrap band" id="news" style="padding-top:0"><div class="sec-h"><h2>選挙ニュース・ガイド</h2></div>
    <div class="news">${NEWS.map(([c,t,col,dt,href])=>`<a class="art" href="${href}"><svg viewBox="0 0 320 150" aria-hidden="true"><rect width="320" height="150" fill="${col}"/><circle cx="260" cy="40" r="60" fill="#fff" opacity=".18"/><rect x="24" y="70" width="90" height="56" rx="8" fill="#fff" opacity=".9"/><rect x="40" y="82" width="58" height="6" rx="3" fill="${col}"/><rect x="40" y="96" width="40" height="6" rx="3" fill="${col}" opacity=".6"/></svg><div><span class="tag">${c}</span><h3>${t}</h3><span class="meta">${dt}</span></div></a>`).join('')}</div></section>
+
+  <section class="wrap band" id="colsec" style="padding-top:0"><div class="sec-h"><h2>コラム</h2><a href="#column">コラム一覧</a></div>
+   <div class="news">${COLS.slice(0,3).map(colCard).join('')}</div></section>
 
   <section class="wrap band" style="padding-top:0"><div class="sec-h"><h2>投票に行く前に</h2></div><div class="steps">
    <div><h3>期日前投票も使える</h3><p>告示日の翌日から投票日の前日まで、市役所などで投票できます。予定がある日も安心です。</p></div>
@@ -816,12 +819,208 @@ function area(){
   ${ad()}
   <p class="src">住所の判定：郵便番号検索API（zipcloud）。選挙区は市区町村単位で判定しています。政令市の区や一部の地域で選挙区が分かれる場合は、選挙管理委員会の案内をご確認ください。</p></div>`;
 }
+/* コラム：COLS に1件ずつ足す。id は c- で始める（#c-xxx がページのURL） */
+const COLS=[{id:'c-imin',tag:'論点整理',t:'移民・外国人政策の論点を整理する',d:'2026/11/23',col:'#2f8f6b',lead:'在留外国人は過去最多の約428万人。数字、国の制度の動き、論点ごとの主張、各党の立場を整理しました。',f:()=>colImin()}];
+const colCard=c=>`<a class="art" href="#${c.id}"><svg viewBox="0 0 320 150" aria-hidden="true"><rect width="320" height="150" fill="${c.col}"/><circle cx="260" cy="40" r="60" fill="#fff" opacity=".18"/><rect x="24" y="70" width="90" height="56" rx="8" fill="#fff" opacity=".9"/><rect x="40" y="82" width="58" height="6" rx="3" fill="${c.col}"/><rect x="40" y="96" width="40" height="6" rx="3" fill="${c.col}" opacity=".6"/></svg><div><span class="tag">コラム・${esc(c.tag)}</span><h3>${esc(c.t)}</h3><p class="meta" style="margin:4px 0">${esc(c.lead)}</p><span class="meta">${c.d}</span></div></a>`;
+function columns(){
+  return `<div class="wrap band"><p class="crumb" style="font-size:13px;color:var(--sub)"><a href="#home" style="color:var(--sub)">トップ</a> ／ コラム</p>
+  <h1 style="font-size:clamp(26px,4vw,36px)">コラム</h1>
+  <p class="meta" style="max-width:40em">選挙で問われるテーマを、公的なデータと各党・各方面の主張から整理します。特定の政党や候補者を支持・推薦するものではありません。</p>
+  <div class="news" style="margin-top:16px">${COLS.map(colCard).join('')}</div></div>`;
+}
+function colImin(){
+  return `  <article class="artp">
+  <p class="crumb"><a href="#home">トップ</a> ／ <a href="#column">コラム</a> ／ 論点整理</p>
+  <span class="tag">コラム・論点整理</span>
+  <h1>移民・外国人政策の論点を整理する</h1>
+  <p class="meta">2026年11月23日時点の公表資料・報道に基づく｜投票日和 編集部</p>
+  <p class="lead">日本に住む外国人は2026年6月末に約428万人となり、過去最多を更新しました。政府は「秩序ある共生」を掲げて永住・帰化の審査を厳しくする一方、人手不足の分野では特定技能や新しい育成就労制度で受け入れを続けています。2月の衆院選でも、11月の福岡市長選でも、外国人政策は争点の一つになりました。このコラムでは、数字、国の制度の動き、論点ごとの主張、各党の立場を並べて整理します。どれが正しいかを示すものではありません。投票先を考えるときの材料にしてください。</p>
+
+  <h2>数字で見る</h2>
+  <table><tbody>
+   <tr><th>在留外国人</th><td>428万1026人（2026年6月末、過去最多）。2025年末から3.8%増。総人口に占める割合は約3.4〜3.5%（報道により異なる）</td></tr>
+   <tr><th>国籍別</th><td>中国（94万1031人）、ベトナム、韓国の順。上位3か国で全体の約半分</td></tr>
+   <tr><th>在留資格別</th><td>永住者 96万1342人、技術・人文知識・国際業務 51万6184人、留学 47万9626人、特定技能 44万4256人など</td></tr>
+   <tr><th>外国人労働者</th><td>257万1037人（2025年10月末、厚生労働省）。前年から11.7%増。国籍別ではベトナム、中国、フィリピンの順</td></tr>
+   <tr><th>国勢調査</th><td>2025年10月1日の外国人は384万人で、総人口の3.1%。調べ方と時点が違うため、在留外国人数とは一致しません</td></tr>
+   <tr><th>人口の見通し</th><td>総人口は2070年に約8700万人に減る見通し（国立社会保障・人口問題研究所の2023年推計）。この推計は外国人の入国超過を年約16万人と仮定しており、2070年の外国人は約939万人（約1割）になる計算です</td></tr>
+  </tbody></table>
+
+  <h2>「移民政策」という言葉</h2>
+  <p>政府はこれまで「いわゆる移民政策はとらない」と説明してきました。2025年9月には当時の鈴木馨祐法相が、一定規模の外国人と家族を期限を設けずに受け入れて国家を維持する政策、と定義したうえで、それはとらないと述べています。高市内閣の施政方針演説などでは「移民」という言葉は使われず、「外国人との秩序ある共生社会」という表現が使われています。同じ「移民」という言葉でも、人によって指す範囲が違う点に注意が必要です。</p>
+
+  <h2>国の制度の主な動き</h2>
+  <table><thead><tr><th>時期</th><th>内容</th></tr></thead><tbody>
+   <tr><th>2025年10月</th><td>在留資格「経営・管理」の資本金要件を500万円から3000万円に引き上げ。申請は約96%減</td></tr>
+   <tr><th>2026年1月</th><td>関係閣僚会議が「外国人の受入れ・秩序ある共生のための総合的対応策」を決定。特定技能・育成就労の受け入れ見込み数を2028年度末までに合計123万1900人と決定</td></tr>
+   <tr><th>2026年4月</th><td>帰化の審査で「原則10年以上の在留」を求める運用を開始（法律上の住所要件5年は変わらず）。医療費不払いを在留審査で確認する基準額を1万円以上に引き下げ</td></tr>
+   <tr><th>2026年5月</th><td>改正入管法が成立。在留手続きの手数料の上限を引き上げ（更新は上限10万円、永住許可は上限30万円。実際の額は政令で決める）、電子渡航認証「JESTA」を創設（2028年度中の導入予定）</td></tr>
+   <tr><th>2026年7月</th><td>受け入れの規模を管理する「量的マネジメント」を含む基本方針を、2026年度中（2027年3月まで）にまとめる方針を決定</td></tr>
+   <tr><th>2026年11月</th><td>重要施設の周囲約1000mと無人の国境離島で、土地の所有権移転を事前許可制にする重要土地等調査法の改正案が、20日に衆院内閣委員会で可決（日本人・日本法人も対象）</td></tr>
+   <tr><th>2027年4月</th><td>技能実習に代わる「育成就労制度」が始まる。税・社会保険料を故意に払わない永住者の在留資格を取り消せる制度の運用も始まる予定</td></tr>
+   <tr><th>2027年6月</th><td>国民健康保険料の滞納者は、原則として在留資格の更新などを認めない仕組みを始める予定</td></tr>
+  </tbody></table>
+  <p>不法残留者は2026年1月時点で6万8488人で、1年前より8.5%減りました。政府は2025年に「不法滞在者ゼロプラン」をまとめ、強制送還を増やしています。</p>
+
+  <h2>論点ごとの主な主張</h2>
+  <p>それぞれの論点で、受け入れや権利の保障を重視する側と、抑制や厳格化を重視する側の主な主張、よく引かれるデータを並べました。</p>
+
+  <h3>1. 人手不足と受け入れの規模</h3>
+  <ul>
+   <li><b>受け入れが必要とする側：</b>経団連は「秩序ある受入れ」を支持。宮城県の村井嘉浩知事は、水産業などは外国人材なしでは成り立たないと述べています。JICA緒方研究所は、2040年に外国人労働者が約97万人不足すると推計しています。</li>
+   <li><b>規模を抑えるべきとする側：</b>日本維新の会は外国人比率の上限設定の検討を、参政党は外国人比率の目標設定や受け入れ総量の厳格化を掲げています。日本保守党は「移民はもういらん。」と訴えています。政府も「量的マネジメント」を検討中ですが、具体的な数字はまだ示していません。</li>
+  </ul>
+
+  <h3>2. 賃金と雇用</h3>
+  <ul>
+   <li>内閣府の分析では、外国人と日本人の賃金差は単純比較で28.3%、年齢や事業所などの条件をそろえると7.1%でした。</li>
+   <li>経済産業研究所（RIETI）の研究は、受け入れの拡大が日本人を含む賃上げを抑える方向に働きうると指摘しています。</li>
+   <li>連合は、受け入れ企業が「日本人との同等報酬」を守っているかの確認を徹底するよう国に求めています。</li>
+  </ul>
+
+  <h3>3. 治安</h3>
+  <ul>
+   <li><b>増加を指摘する側：</b>警察庁によると、2025年の来日外国人による刑法犯の検挙は1万7614件・7333人で、前年の1万3405件・6368人から増えました。刑法犯の検挙件数全体に占める割合は5.9%で、記録のある1989年以降で最も高くなりました。</li>
+   <li><b>読み方に注意を促す側：</b>件数は少人数のグループの余罪で大きく増えることがあり、外国人の事件は共犯の割合が高い（来日外国人45.3%、日本人11.5%）と警察白書は説明しています。長い目で見ると、検挙件数は2005年の3万3037件が最多です。年齢構成をそろえて比べると、外国人の犯罪率は日本人の約1.3倍だが、都道府県ごとの差の範囲内だとする研究者の分析もあります（2023年までのデータが中心）。</li>
+   <li>統計の「来日外国人」には、永住者や特別永住者などは含まれません。</li>
+  </ul>
+
+  <h3>4. 社会保障と税</h3>
+  <ul>
+   <li><b>未納の対策を求める側：</b>厚生労働省が約150自治体に聞いた調査では、外国人の国民健康保険料の収納率は約63%で、日本人を含む全体の93%を下回りました。自民党は、社会保障や税の制度はもともと多数の外国人の在留を前提に作られていないとして、見直しを求めています。</li>
+   <li><b>負担は大きくないとする側：</b>同じ厚労省の資料では、外国人は国保加入者の4.0%ですが、医療費全体に占める割合は1.39%です。生活保護を受けている外国籍の世帯は、受給世帯全体の2.9%（2023年度）です。収納率の調査は全国の平均を示すものではない点にも注意が必要です。</li>
+  </ul>
+
+  <h3>5. 地域での共生と日本語教育</h3>
+  <ul>
+   <li>公立学校で日本語指導が必要な子どもは約8万5千人、就学状況が確認できない外国籍の子どもは約9千人います。</li>
+   <li>政府は日本語や生活のルールを学ぶプログラムを2028年度から試行する方向で、受講状況を在留審査に使うことも検討しています。</li>
+   <li>全国知事会は2026年8月、国に外国人政策の司令塔と「基本法」をつくるよう求めました。立憲民主党などは「多文化共生社会基本法」を、国民民主党・社民党・れいわ新選組などは差別を禁止する法律を求めています。</li>
+  </ul>
+
+  <h3>6. 永住・帰化・家族の帯同</h3>
+  <ul>
+   <li><b>厳格化を進める側：</b>政府・自民党は永住の取消し事由の拡大や、学習プログラムの受講の要件化を検討しています。維新は永住や家族帯同に日本語の要件を課すことを、日本保守党は家族帯同を認める方針の見直しを掲げています。</li>
+   <li><b>反対・慎重な側：</b>共産党は2024年の法改正でできた永住許可の取消し制度の廃止と、在留資格を問わない家族帯同を主張しています。在日本大韓民国民団（民団）は取消し制度の拡大に反対する集会を開きました。</li>
+  </ul>
+
+  <h3>7. 難民の認定</h3>
+  <ul>
+   <li>2025年の難民認定申請は1万1298人、認定は187人でした。ほかに補完的保護の対象者が474人、人道上の配慮で在留を認められた人が525人います。</li>
+   <li><b>迅速化・悪用防止を求める側：</b>政府は審査の平均期間を2030年までに6か月にする目標です。参政党は申請を原則1回までにすることを提案しています。埼玉県の大野元裕知事は、査証免除で入国して難民申請を繰り返し、滞在を続ける例があるとして、トルコとの査証免除の一時停止を国に求めています。</li>
+   <li><b>保護の強化を求める側：</b>共産党やれいわ新選組は、入管から独立した難民認定の機関を求めています。日本弁護士連合会は「不法滞在者ゼロプラン」が国際人権法の求める保障と両立しないとする声明を出しました。</li>
+  </ul>
+
+  <h3>8. 外国人の土地取得</h3>
+  <ul>
+   <li>自衛隊基地など重要施設の周辺での土地の取得のうち、外国人・外国系法人によるものは3.1%（2024年度）で、うち約半数が中国（香港を含む）でした。施設の機能を妨げる行為への勧告・命令はこれまでありません。</li>
+   <li>国会に出ている改正案は、国籍ではなく安全保障上のリスクで判断し、日本人も対象にする仕組みです。維新・国民民主は独自の規制法案を出したことがあり、参政党は国による買い戻しなども提案しています。</li>
+  </ul>
+
+  <h3>9. 外国人の地方参政権</h3>
+  <ul>
+   <li>維新は「外国人参政権付与は認めません」、参政党も反対の立場です。共産党は永住外国人に地方参政権を「ただちに付与」と主張し、公明党は「丁寧に検討」としています。ほかの党の最近の立場は、この記事では確認できていません。</li>
+  </ul>
+
+  <h2>各党の立場</h2>
+  <p>2026年衆院選の公約や、その後の党の提言・申し入れから要点をまとめました。各党の正確な主張は、党の公式資料で確かめてください。</p>
+  <table><thead><tr><th>党</th><th>主な主張</th></tr></thead><tbody>
+   <tr><th>自民</th><td>「秩序ある共生」。不法滞在対策の強化、帰化・永住の厳格化、日本語・生活学習プログラムの創設、安全保障上の土地取得規制。受け入れ人数の上限は公約に入れていない</td></tr>
+   <tr><th>日本維新の会</th><td>外国人比率の上限設定の検討、在留資格の量的管理、帰化取消し制度の創設、日本版CFIUS（外国投資の審査機関）、外国人参政権に反対</td></tr>
+   <tr><th>立憲民主</th><td>多文化共生社会基本法の制定、日本語教育や医療へのアクセスの保障、ヘイトスピーチ対策。「不法滞在者ゼロプラン」に懸念</td></tr>
+   <tr><th>公明</th><td>「ルールに基づく受け入れ」。社会保険料の未納を在留審査に反映、育成就労での人権保護、日本語教育の強化。永住外国人の地方参政権は「丁寧に検討」</td></tr>
+   <tr><th>国民民主</th><td>国が主体となった日本語教育、差別禁止法の制定、外国人による不動産取得を規制する新法</td></tr>
+   <tr><th>参政</th><td>「移民国家にしない」。外国人比率の目標設定、外国人総合政策庁の新設、外国人の生活保護は原則認めない方向、難民申請は原則1回まで</td></tr>
+   <tr><th>共産</th><td>多文化共生社会の実現、育成就労の廃止を含む見直し、永住許可取消し制度の廃止、永住外国人の地方参政権</td></tr>
+   <tr><th>れいわ新選組</th><td>技能実習の廃止、独立した難民認定委員会、外国人の権利を定める包括的な法律、差別禁止の法整備</td></tr>
+   <tr><th>日本保守党</th><td>「移民政策の是正」。家族帯同の方針の見直し、外国人の健康保険・年金を別の制度に、外国勢力による土地買収の禁止</td></tr>
+   <tr><th>社民</th><td>「排外主義より多文化共生を」。罰則つきの差別禁止法</td></tr>
+   <tr><th>チームみらい</th><td>衆院選公約に外国人政策の記述は見当たらない</td></tr>
+  </tbody></table>
+  <p class="note">中道改革連合（立憲民主党と公明党が2026年1月に結成）は2026年9月に分かれ、衆院の立憲系議員は「民主改革の会」を結成し、公明系は公明党に戻りました。民主改革の会の外国人政策の独自の文書は、この記事では確認できていません。</p>
+
+  <h2>世論はどう見ているか</h2>
+  <ul>
+   <li>時事通信の調査（2026年5月）では、外国人労働者の受け入れ拡大に「賛成」が58.2%で、2024年の71.8%から下がっています。賛成の理由は「人手不足の緩和」、反対の理由は「不法滞在・治安」が最も多くなりました。</li>
+   <li>読売新聞と早稲田大学の調査（2025年秋）では、外国人労働者の積極的な受け入れに反対が59%でした。一方で、人手不足の緩和に役立つと考える人も61%いました。</li>
+   <li>東京大学社会科学研究所のパネル調査（2026年1〜3月、特定の年齢層が対象）では、定住目的の外国人がもっと増えた方がよいという考えに「反対」が56.3%で、2024年の35.6%から大きく増えました。</li>
+  </ul>
+
+  <h2>地方の選挙との関わり</h2>
+  <p>受け入れの人数や在留資格を決めるのは国ですが、日本語教室、学校での日本語指導、ごみ出しなどの生活ルールの案内、国民健康保険料の徴収、災害時の多言語での情報発信は、市区町村や都道府県の仕事です。2026年11月の福岡市長選は13人が立候補して法定得票に届く候補がなく、再選挙になりました。外国人政策を訴えた日本保守党の候補は約9万3千票で3位でした。知事選や市区町村の選挙でも、地域の実情に合わせた共生の進め方が問われています。</p>
+
+  <h2>候補者に聞いてみたいこと</h2>
+  <ul>
+   <li>人手不足の分野で、外国人の受け入れを増やすべきか、減らすべきか。その代わりに何をするか</li>
+   <li>受け入れの規模に上限を設けるべきか。設けるなら、どう決めるか</li>
+   <li>地域の日本語教育や、外国籍の子どもの就学をどう支えるか</li>
+   <li>税・社会保険料の未納や不法滞在に、どう対応するか</li>
+   <li>差別やヘイトスピーチを防ぐ仕組みをどうするか</li>
+  </ul>
+  <p class="note">このコラムは、2026年11月23日時点で公表されている政府資料、各党の公約・提言、報道をもとに投票日和編集部がまとめたものです。特定の政党や候補者を支持・推薦するものではありません。数字や制度は今後変わることがあります。</p>
+
+  <h2>出典</h2>
+  <ul class="src">
+   <li><a href="https://www.nippon.com/ja/news/yjj2026101600225/" target="_blank" rel="noopener">時事通信（nippon.com）「在留外国人」2026年6月末の統計（2026年10月16日）</a></li>
+   <li><a href="https://kumanichi.com/articles/2047152" target="_blank" rel="noopener">共同通信（熊本日日新聞）「在留外国人増、6月末428万人」（2026年10月16日）</a></li>
+   <li><a href="https://www.mhlw.go.jp/stf/newpage_68794.html" target="_blank" rel="noopener">厚生労働省「外国人雇用状況」の届出状況まとめ（令和7年10月末時点）（2026年1月30日）</a></li>
+   <li><a href="https://www.nippon.com/ja/japan-data/h02915/" target="_blank" rel="noopener">nippon.com「人口5年で317万人減少―国勢調査」（2026年9月29日）</a></li>
+   <li><a href="https://www.mhlw.go.jp/content/12601000/001091141.pdf" target="_blank" rel="noopener">国立社会保障・人口問題研究所「日本の将来推計人口（令和5年推計）」概要</a></li>
+   <li><a href="https://www.nippon.com/ja/japan-data/h01664/" target="_blank" rel="noopener">nippon.com 将来推計人口の解説（2023年4月26日）</a></li>
+   <li><a href="https://www.moj.go.jp/hisho/kouhou/hisho08_00649.html" target="_blank" rel="noopener">法務省 法務大臣閣議後記者会見の概要（2025年9月19日）</a></li>
+   <li><a href="https://www.kantei.go.jp/jp/105/statement/2026/0220shiseihoshin.html" target="_blank" rel="noopener">首相官邸 高市内閣総理大臣施政方針演説（2026年2月20日）</a></li>
+   <li><a href="https://www.kantei.go.jp/jp/pages/20260123choukan_gaikokujin.html" target="_blank" rel="noopener">首相官邸 外国人の受入れ・秩序ある共生社会実現に関する関係閣僚会議（2026年1月23日）</a></li>
+   <li><a href="https://www.kantei.go.jp/jp/singi/gaikokujinzai/pdf/kettei_honbun.pdf" target="_blank" rel="noopener">外国人の受入れ・秩序ある共生のための総合的対応策（2026年1月23日決定）</a></li>
+   <li><a href="https://www.cas.go.jp/jp/seisaku/symbiotic_society/pdf/sougoutekitaiousaku_shinchoku_gaiyo.pdf" target="_blank" rel="noopener">内閣官房 総合的対応策の進捗状況（2026年3月末時点）</a></li>
+   <li><a href="https://www.cas.go.jp/jp/seisakukaigi/gaikokujinzai/kakuryokaigi/dai3/gijiroku.pdf" target="_blank" rel="noopener">内閣官房 関係閣僚会議（第3回）議事録（2026年7月24日）</a></li>
+   <li><a href="https://www.mhlw.go.jp/stf/newpage_000117702_00015.html" target="_blank" rel="noopener">厚生労働省「育成就労制度」</a></li>
+   <li><a href="https://www.moj.go.jp/hisho/kouhou/hisho08_00706.html" target="_blank" rel="noopener">法務省 法務大臣閣議後記者会見の概要（2026年3月27日・帰化の運用）</a></li>
+   <li><a href="https://www.moj.go.jp/hisho/kouhou/hisho08_00721.html" target="_blank" rel="noopener">法務省 法務大臣閣議後記者会見の概要（2026年5月22日・不法滞在対策）</a></li>
+   <li><a href="https://www.sangiin.go.jp/japanese/joho1/kousei/gian/222/meisai/m222080222018.htm" target="_blank" rel="noopener">参議院 議案情報 重要土地等調査法改正案（2026年11月20日現在）</a></li>
+   <li><a href="https://www.cao.go.jp/tochi-chosa/doc/kohyor6.pdf" target="_blank" rel="noopener">内閣府「重要施設周辺等における土地等の取得の状況（令和6年度）」</a></li>
+   <li><a href="https://kumanichi.com/articles/1920935" target="_blank" rel="noopener">共同通信（熊本日日新聞）国保滞納者の在留審査（2025年11月4日）</a></li>
+   <li><a href="https://www.mhlw.go.jp/content/12401000/001616165.pdf" target="_blank" rel="noopener">厚生労働省「在留外国人の医療保険適用の課題と対応」</a></li>
+   <li><a href="https://www.nippon.com/ja/japan-data/h02472/" target="_blank" rel="noopener">nippon.com 生活保護を受ける外国籍世帯（2025年7月9日）</a></li>
+   <li><a href="https://www.jcp.or.jp/akahata/aik26/2026-05-30/2026053002_04_0.php" target="_blank" rel="noopener">しんぶん赤旗 改正入管法の成立（2026年5月30日。成立と手数料の上限額のみ使用）</a></li>
+   <li><a href="https://www5.cao.go.jp/j-j/wp/wp-je24/h02-03.html" target="_blank" rel="noopener">内閣府「令和6年度 年次経済財政報告」第2章第3節</a></li>
+   <li><a href="https://www.rieti.go.jp/jp/publications/nts/26j035.html" target="_blank" rel="noopener">経済産業研究所「特定技能外国人雇用の客観的効果と主観的評価」</a></li>
+   <li><a href="https://www.jtuc-rengo.or.jp/news/news_detail.php?id=2406" target="_blank" rel="noopener">連合 出入国在留管理庁への要請（2026年9月10日）</a></li>
+   <li><a href="https://www.keidanren.or.jp/journal/times/2026/1105_04.html" target="_blank" rel="noopener">経団連タイムス（2026年11月5日）</a></li>
+   <li><a href="https://www.jica.go.jp/jica_ri/publication/booksandreports/__icsFiles/afieldfile/2024/08/13/2030_final.pdf" target="_blank" rel="noopener">JICA緒方貞子平和開発研究所 外国人労働者の需給推計 最終報告書（2024年7月）</a></li>
+   <li><a href="https://www.pref.miyagi.jp/site/chiji-kaiken/kk-250903.html" target="_blank" rel="noopener">宮城県 知事定例記者会見（2025年9月3日）</a></li>
+   <li><a href="https://www.npa.go.jp/toukei/soubunkan/R07/pdf/R07_26.pdf" target="_blank" rel="noopener">警察庁 犯罪統計資料 来日外国人の国籍別検挙（2025年）</a></li>
+   <li><a href="https://www.cas.go.jp/jp/seisakukaigi/gaikokujinzai/arikatawg/dai2/shiryo2.pdf" target="_blank" rel="noopener">警察庁「来日外国人犯罪情勢について」（政府の有識者会議資料）</a></li>
+   <li><a href="https://www.npa.go.jp/hakusyo/r08/honbun/html/cc4421000.html" target="_blank" rel="noopener">警察庁 警察白書 令和8年版 第4章第2節</a></li>
+   <li><a href="https://hakusyo1.moj.go.jp/jp/72/nfm/n72_2_4_9_2_1.html" target="_blank" rel="noopener">法務省 令和7年版 犯罪白書 第4編第9章第2節</a></li>
+   <li><a href="https://www.hitachi-zaidan.org/global-society-review/vol4/assets/pdf/vol4_commentary.pdf" target="_blank" rel="noopener">是川夕「統計から読み解く移民社会」日立財団『グローバル ソサエティ レビュー』第4号（2025年6月）</a></li>
+   <li><a href="https://www.moj.go.jp/isa/publications/press/07_00058.html" target="_blank" rel="noopener">出入国在留管理庁「令和7年における難民認定者数等について」（2026年3月27日）</a></li>
+   <li><a href="https://www.ben54.jp/news/3819" target="_blank" rel="noopener">弁護士JP 日弁連の声明についての報道（2026年8月18日）</a></li>
+   <li><a href="https://www.pref.saitama.lg.jp/a0101/news/page/news2026011401.html" target="_blank" rel="noopener">埼玉県 知事の外務省への要望（2026年1月14日）</a></li>
+   <li><a href="https://kumanichi.com/articles/2022251" target="_blank" rel="noopener">共同通信（熊本日日新聞）全国知事会の国への要請（2026年8月5日）</a></li>
+   <li><a href="https://www.jimin.jp/policy/policy-related/foreign-resident-policy/foreign-resident-policy-proposal.html" target="_blank" rel="noopener">自民党 外国人政策本部 第2次提言（2026年6月9日）</a></li>
+   <li><a href="https://partsa.nikkei.com/parts/ds/shuin2026/pdf/ishin_b.pdf" target="_blank" rel="noopener">日本維新の会「維新八策2026 個別政策集」</a></li>
+   <li><a href="https://cdp-japan.jp/files/download/2026/4WaO/Rwpn/5IHx/20264WaORwpn5IHxy9xWlX5S.pdf" target="_blank" rel="noopener">立憲民主党「多文化共生社会の実現を求める申し入れ」（2026年9月8日）</a></li>
+   <li><a href="https://www.komei.or.jp/komeipolicy/" target="_blank" rel="noopener">公明党「政策・提言」</a></li>
+   <li><a href="https://www.refugee.or.jp/report/refugee/2026/01/manifest2602/" target="_blank" rel="noopener">難民支援協会「2026年衆議院議員選挙：各政党の公約」（2026年1月30日。国民民主党の公約などの要約）</a></li>
+   <li><a href="https://partsa.nikkei.com/parts/ds/shuin2026/pdf/sansei_b.pdf" target="_blank" rel="noopener">参政党「2026 衆議院選挙公約」</a></li>
+   <li><a href="https://www.jcp.or.jp/web_policy/16348.html" target="_blank" rel="noopener">日本共産党「外国人の人権と入管、難民」（2026年1月）</a></li>
+   <li><a href="https://reiwa-shinsengumi.com/wp-content/uploads/2026/07/れいわ新選組基本政策.pdf" target="_blank" rel="noopener">れいわ新選組 基本政策</a></li>
+   <li><a href="https://partsa.nikkei.com/parts/ds/sanin2025/pdf/hoshu.pdf" target="_blank" rel="noopener">日本保守党「重点政策項目」</a></li>
+   <li><a href="https://r8shugiinsen.metro.tokyo.lg.jp/proportional/files/R8shuinhirei_06_onsei.pdf" target="_blank" rel="noopener">東京都選挙管理委員会 衆院選選挙公報（社会民主党）</a></li>
+   <li><a href="https://www.nippon.com/ja/news/yjj2026091600098/" target="_blank" rel="noopener">時事通信（nippon.com）「新党名『民主改革の会』」（2026年9月16日）</a></li>
+   <li><a href="https://english.adnkronos.com/2026/07/23/focus-support-for-more-foreign-workers-in-japan-falls-below-60-pct/" target="_blank" rel="noopener">時事通信の世論調査（英語配信の転載、2026年7月23日）</a></li>
+   <li><a href="https://asianews.network/?p=243054" target="_blank" rel="noopener">読売新聞・早稲田大学の共同世論調査（英語配信の転載、2025年12月3日）</a></li>
+   <li><a href="https://csrda.iss.u-tokyo.ac.jp/socialresearch/pr/26PressRelease_2.pdf" target="_blank" rel="noopener">東京大学社会科学研究所 パネル調査プレスリリース（2026年8月7日）</a></li>
+   <li><a href="https://data-max.co.jp/article/88029" target="_blank" rel="noopener">NetIB-News 福岡市長選についての報道（2026年11月18日）</a></li>
+  </ul>
+  </article>`;
+}
 function route(){
   const h=location.hash.slice(1)||'home',app=$('#app');
   const e=E.find(x=>x.id===h);const jp=h.startsWith('j-')&&JN.find(j=>jinActive(j)&&'j-'+j.id===h);
-  app.innerHTML=jp?jinPage(jp):h==='a-uscr'?artUSCR():h==='plans'?plans():h==='apply'?apply():h==='terms'?terms():h==='tokusho'?tokusho():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
-  document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(['plans','apply','terms','tokusho'].includes(h)?'plans':['edit','search'].includes(h)?h:'home')));
-  document.title=(jp?jp.n+'（'+(jp.kata||'陣営プラン')+'）':e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='apply'?'陣営プランのお申し込み':h==='terms'?'陣営プラン利用規約':h==='tokusho'?'特定商取引法に基づく表記':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='a-uscr'?'史上初の米中露首脳会談　「平和宣言」で何が決まった？':h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
+  app.innerHTML=jp?jinPage(jp):h==='a-uscr'?artUSCR():h==='column'?columns():COLS.some(c=>c.id===h)?COLS.find(c=>c.id===h).f():h==='plans'?plans():h==='apply'?apply():h==='terms'?terms():h==='tokusho'?tokusho():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
+  document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(h==='column'||COLS.some(c=>c.id===h)?'column':['plans','apply','terms','tokusho'].includes(h)?'plans':['edit','search'].includes(h)?h:'home')));
+  document.title=(jp?jp.n+'（'+(jp.kata||'陣営プラン')+'）':e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='apply'?'陣営プランのお申し込み':h==='terms'?'陣営プラン利用規約':h==='tokusho'?'特定商取引法に基づく表記':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='a-uscr'?'史上初の米中露首脳会談　「平和宣言」で何が決まった？':h==='column'?'コラム':COLS.some(c=>c.id===h)?COLS.find(c=>c.id===h).t:h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
   if(h==='edit')renderPrev();
   watchVotes(e);
   window.scrollTo(0,0);closeD();

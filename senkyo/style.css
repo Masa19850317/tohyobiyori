@@ -187,7 +187,7 @@ table{border-collapse:collapse;width:100%}
 .artp .note{font-size:14px;color:var(--sub);background:var(--soft);border-radius:12px;padding:12px 14px}
 .artp .src{font-size:14px}
 .artp .src li{margin-bottom:4px}
-@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal}}
+@media (max-width:640px){.pick{grid-template-columns:1fr}.artp th{white-space:normal;min-width:6.5em}}
 .topnews{display:flex;align-items:center;gap:10px;padding:10px max(4vw,16px);background:#14213a;color:#fff;text-decoration:none;font-weight:700;font-size:14px;line-height:1.4}
 .topnews .tag{flex:none}
 .topnews span:last-child{margin-left:auto;flex:none;color:var(--sun)}
