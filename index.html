@@ -290,7 +290,7 @@ let ri=0;
   note:x.note||(m==='見込み'?(n.includes('再選挙')?'2026年11月15日の選挙で法定得票数に達した候補者がいなかったための再選挙です。日程は報道ベースの見込みで、市選挙管理委員会の決定後に更新します。':'統一地方選挙の投票日は、臨時特例法の成立で正式に決まります。表示している日付は見込みです。'):ap?'投票日・告示日は未定です。決まりしだい更新します。':'')});});
 E.push({id:'touitsu-late',name:'統一地方選挙 後半戦',dist:'市区町村長・市区町村議会議員選挙',pref:'全国',date:'2027-04-25',ap:'',mk:true,kokuji:'2027-04-18',seats:null,type:'統一地方選（後半）',cands:[],count:925,src:SRC27,
  note:'政令指定都市以外の市・特別区・町村の長と議員の選挙、あわせて925件（見込み）。告示日は市・特別区が4月18日、町村が4月20日の見込みです。都道府県別の件数：北海道181、東京65、愛知46、長野44、福岡38、埼玉36、大阪31、奈良30、群馬28、千葉26、熊本26、岐阜25 ほか。各選挙のページは順次作成します。'});
-const distOf=e=>{const d=DIST[e.name];if(!d||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v,w}}):null}})};
+const distOf=e=>{const d=DIST[e.name];if(!d||!d.list||e.smp)return null;return d.list.split('\n').map(l=>{const [n,a,s]=l.split('|');const c=d.cands[n];return {n,a,s:+s,src:c&&c.src,off:c&&c.off,c:c&&c.c?c.c.split('\n').map(x=>{const [nm,age,p,st,nt,v,w]=x.split('|');return {nm,age,p,st,nt,v,w}}):null}})};
 
 /* 得票数：votes.json を読み込み、投票日の夜は60秒ごとに再取得して表示を更新する */
 let VOTES={};
@@ -324,7 +324,7 @@ function loadVotes(){
   }).catch(()=>{});
 }
 function watchVotes(e){if(vTimer)clearInterval(vTimer);vTimer=null;if(e&&isVoteNight(e)&&typeof setInterval==='function')vTimer=setInterval(loadVotes,60000);}
-const distTxt=e=>{const d=DIST[e.name];return d?d.list.replace(/\|\d+/g,''):''};
+const distTxt=e=>{const d=DIST[e.name];return d&&d.list?d.list.replace(/\|\d+/g,''):''};
 
 const when=e=>e.ap?`${e.date.slice(0,4)}年${e.ap}`:fmt(e.date)+(e.mk?'（見込み）':'');
 const TYPES=['国政','知事','都道府県議','市区町村長','市区町村議'];
@@ -491,7 +491,7 @@ function election(e){
   ${e.note?`<p>${esc(e.note)}</p>`:''}
   ${distBlock(e)}
   ${prevBlock(e)}
-  ${!e.cands.length&&!e.others&&!((distOf(e)||[]).some(d=>d.c)||(DIST[e.name]&&e.kokuji&&days(e.kokuji)<=0))?`<div class="notice"><strong>候補者は告示日${e.kokuji?`（${fmt(e.kokuji)}${e.mk?'・見込み':''}）`:''}の立候補届出後に掲載します。</strong><br>立候補予定の陣営の方は、事前に陣営アカウントを作成しておくと、告示日当日から写真や政策を掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`:''}
+  ${!e.cands.length&&!e.others&&!((distOf(e)||[]).some(d=>d.c)||(DIST[e.name]&&DIST[e.name].list&&e.kokuji&&days(e.kokuji)<=0))?`<div class="notice"><strong>候補者は告示日${e.kokuji?`（${fmt(e.kokuji)}${e.mk?'・見込み':''}）`:''}の立候補届出後に掲載します。</strong><br>立候補予定の陣営の方は、事前に陣営アカウントを作成しておくと、告示日当日から写真や政策を掲載できます。<br><a href="#plans">掲載プランを見る</a></div>`:''}
   ${!e.cands.length?ad():''}
   <h2 style="font-size:22px;margin-top:20px;${e.cands.length?'':'display:none'}">${e.done?'開票結果':'候補者'}<span class="meta" style="font-size:13px;font-weight:400">　届出順（全プラン共通）</span></h2>
   ${e.cands.map((id,i)=>candRow(id,e,i)).join('')}
