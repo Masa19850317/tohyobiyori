@@ -166,6 +166,8 @@ table{border-collapse:collapse;width:100%}
 .seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .seg button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
 .seg button.on{background:var(--sky);color:#fff;border-color:var(--sky)}
+[hidden]{display:none!important}
+.phf{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.phf .av{width:90px;height:108px;object-fit:cover}.phf .btns{display:flex;gap:8px;flex-wrap:wrap}.phf .btn{min-height:44px;padding:0 14px;cursor:pointer}
 .pv{position:sticky;top:76px;border:1px solid var(--line);border-radius:16px;padding:0 16px;background:var(--card)}
 .ic{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--ink);padding:0}
 .ic:hover{background:var(--soft)}
@@ -771,26 +773,84 @@ function tokusho(){
   <tr><th>契約期間・解約</th><td>最低利用期間6か月、以後6か月ごとの自動更新。更新月の前月末までのご連絡で解約できます。</td></tr>
   <tr><th>返品・返金</th><td>サービスの性質上、提供開始後の返金はできません。本人確認ができず契約が成立しなかった場合は全額返金します。</td></tr></table></div>`;
 }
-let pv='pre';
+let pv='pre',EP='';
+const EF=['f-n','f-kata','f-area','f-mail','f-tel','f-copy','f-pol','f-act','f-yt'];
 function edit(){
-  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">陣営の方が掲載内容を入力する画面です（受付準備中）。プランを切り替えると、編集できる項目とプレビューが変わります。</p>
-  <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
+  const dis=k=>pv==='free'||(k==='pre'&&pv!=='pre');
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">入力した内容と写真は、この端末に自動で保存されます。「保存して送信」を押すと運営に届き、本人確認と内容の確認のあと公開します（通常3営業日以内）。</p>
+  <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button type="button" data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
   <div class="edit"><form id="ef">
-   <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" placeholder="例：選挙管理委員会への届出どおりの氏名"></div>
+   <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" required autocomplete="name" placeholder="例：選挙管理委員会への届出どおりの氏名"></div>
    <div class="fld"><label for="f-kata">肩書</label><input id="f-kata" placeholder="例：市議会議員、会社員"></div>
-   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${pv==='free'?'<span class="lock">陣営プラン</span>':''}</label><input id="f-copy" maxlength="40" placeholder="例：くらしの声を、議会へ。" ${pv==='free'?'disabled':''}></div>
-   <div class="fld"><label for="f-pol">政策・メッセージ ${pv==='free'?'<span class="lock">陣営プラン</span>':pv==='std'?'<span class="meta">（2,000字まで）</span>':''}</label><textarea id="f-pol" ${pv==='free'?'disabled':''} ${pv==='std'?'maxlength="2000"':''} placeholder="政策や有権者へのメッセージ"></textarea></div>
-   <div class="fld"><label for="f-act">活動実績 ${pv!=='pre'?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-act" ${pv!=='pre'?'disabled':''} placeholder="これまでの活動"></textarea></div>
-   <div class="fld"><label for="f-yt">YouTube動画のURL ${pv!=='pre'?'<span class="lock">陣営プラン</span>':''}</label><input id="f-yt" placeholder="https://www.youtube.com/watch?v=..." ${pv!=='pre'?'disabled':''}></div>
-   <button class="btn blue">保存して公開</button></form>
+   <div class="fld"><label for="f-area">自治体・選挙</label><input id="f-area" placeholder="例：神奈川県大磯町／大磯町議会議員選挙"></div>
+   <div class="fld"><label>顔写真（1枚）</label><div class="phf"><div id="ph"></div><div><div class="btns"><label class="btn ghost" for="f-photo">写真を選ぶ</label><button type="button" class="btn ghost" id="ph-del" ${EP?'':'hidden'}>削除</button></div><input type="file" id="f-photo" accept="image/*" hidden><p class="meta" style="margin:6px 0 0">写真は横5：縦6の大きさに、中央で切り抜きます。ご本人の写真に限ります。</p></div></div></div>
+   <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${dis()?'<span class="lock">陣営プラン</span>':''}</label><input id="f-copy" maxlength="40" placeholder="例：くらしの声を、議会へ。" ${dis()?'disabled':''}></div>
+   <div class="fld"><label for="f-pol">政策・メッセージ ${dis()?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-pol" ${dis()?'disabled':''} placeholder="政策や有権者へのメッセージ"></textarea></div>
+   <div class="fld"><label for="f-act">活動実績 ${dis('pre')?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-act" ${dis('pre')?'disabled':''} placeholder="これまでの活動"></textarea></div>
+   <div class="fld"><label for="f-yt">YouTube動画のURL ${dis('pre')?'<span class="lock">陣営プラン</span>':''}</label><input id="f-yt" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." ${dis('pre')?'disabled':''}></div>
+   <div class="fld"><label for="f-mail">連絡先メールアドレス</label><input id="f-mail" type="email" required autocomplete="email"></div>
+   <div class="fld"><label for="f-tel">電話番号（本人確認でお電話します）</label><input id="f-tel" type="tel" autocomplete="tel"></div>
+   <button class="btn blue">保存して送信</button></form>
    <div class="pv"><p class="meta" style="margin:12px 0 0">選挙ページ一覧での見え方</p><div id="prev"></div></div></div></div>`;
 }
+function loadDraft(){
+  try{const d=JSON.parse(localStorage.getItem('tb_edit')||'{}');EF.forEach(i=>{const el=$('#'+i);if(el&&typeof d[i]==='string')el.value=d[i];});EP=d.photo||'';}catch(e){}
+  const del=$('#ph-del');if(del)del.hidden=!EP;
+}
+function saveDraft(){
+  const d={photo:EP,at:Date.now()};EF.forEach(i=>{const el=$('#'+i);if(el)d[i]=el.value;});
+  try{localStorage.setItem('tb_edit',JSON.stringify(d));return true;}catch(e){return false;}
+}
+function readPhoto(f){
+  if(!f)return;
+  if(!/^image\//.test(f.type)){toast('画像ファイルを選んでください');return;}
+  const u=URL.createObjectURL(f),img=new Image();
+  img.onload=()=>{
+    const W=500,H=600,r=W/H;let sw=img.naturalWidth,sh=img.naturalHeight,sx=0,sy=0;
+    if(sw/sh>r){const n=sh*r;sx=(sw-n)/2;sw=n;}else{const n=sw/r;sy=(sh-n)/2;sh=n;}
+    const cv=document.createElement('canvas');cv.width=W;cv.height=H;cv.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,W,H);
+    URL.revokeObjectURL(u);EP=cv.toDataURL('image/jpeg',.85);
+    $('#ph-del').hidden=false;
+    toast(saveDraft()?'写真を保存しました':'写真を読み込みました（この端末には保存できませんでした）');renderPrev();
+  };
+  img.onerror=()=>{URL.revokeObjectURL(u);toast('この画像は読み込めませんでした。JPEGかPNGでお試しください');};
+  img.src=u;
+}
+const photoTag=(c,cls='av')=>EP?`<img class="${cls}" src="${EP}" alt="${esc(c.n)}の写真" style="object-fit:cover">`:av(c);
 function renderPrev(){
   const p=$('#prev');if(!p)return;
   const c={n:$('#f-n').value||'（氏名）',k:'',party:'',age:'',sex:'',st:'',col:'#8a94a6',kata:$('#f-kata').value,copy:pv==='free'?'':$('#f-copy').value,plan:pv};
   const paid=pv!=='free';
-  p.innerHTML=`<div class="cand" style="border:0">${av(c)}<div><h3>${esc(c.n)}</h3><div class="row meta">${esc(c.kata)}</div></div>
+  const ph=$('#ph');if(ph)ph.innerHTML=photoTag(c);
+  p.innerHTML=`<div class="cand" style="border:0">${photoTag(c)}<div><h3>${esc(c.n)}</h3><div class="row meta">${esc(c.kata)}</div></div>
    ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><span class="more" style="color:var(--sky)">この候補者の政策・活動を見る</span>`:`<div class="freeinfo"><span>基本情報を見る</span><span>運営調べ・陣営未登録</span></div>`}</div>`;
+}
+function editDone(id,ok,mailed){
+  $('#app').innerHTML=`<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">${ok?'送信しました':'送信の準備ができました'}</h1>
+  <p>受付番号：<b>${id}</b></p>
+  ${mailed?`<div class="notice"><strong>メールアプリが開いたら、そのまま送信してください。</strong>送信されるまで受付は完了しません。${EP?'<br>写真はメールに添付してお送りください（下のボタンで切り抜き済みの写真を保存できます）。':''}</div>`:''}
+  ${mailed&&EP?`<p><a class="btn ghost" href="${EP}" download="${id}.jpg">写真を保存する</a></p>`:''}
+  <p>運営が本人確認と内容の確認をしてから公開します（通常3営業日以内）。入力内容はこの端末に保存されているので、あとから直して送り直せます。</p>
+  <p class="meta" style="margin-top:20px"><a href="#edit">編集画面に戻る</a></p></div>`;
+  window.scrollTo(0,0);
+}
+function sendEdit(){
+  const v=i=>$('#'+i).value.trim();
+  if(!v('f-n')||!v('f-mail').includes('@')){toast('氏名とメールアドレスを入力してください');return;}
+  saveDraft();
+  const now=new Date(Date.now()+9*3600e3),id='TE'+now.toISOString().slice(2,10).replace(/-/g,'')+Math.random().toString(36).slice(2,6).toUpperCase();
+  const paid=pv!=='free',pre=pv==='pre';
+  const body=`受付番号: ${id}\nプラン: ${P[pv]}\n氏名: ${v('f-n')}\n肩書: ${v('f-kata')}\n自治体・選挙: ${v('f-area')}\nメール: ${v('f-mail')}\n電話: ${v('f-tel')}\n写真: ${EP?'あり':'なし'}\n`+
+    (paid?`キャッチコピー: ${v('f-copy')}\n\n【政策・メッセージ】\n${v('f-pol')}\n`:'')+(pre?`\n【活動実績】\n${v('f-act')}\n\nYouTube: ${v('f-yt')}\n`:'')+`\n送信日時: ${now.toISOString().slice(0,16).replace('T',' ')}`;
+  const subj='【投票日和】陣営ページ原稿 '+id+' '+v('f-n');
+  if(SALES.form){
+    toast('送信しています…');
+    const fd=new FormData();fd.append('_subject',subj);fd.append('email',v('f-mail'));fd.append('message',body);
+    if(EP){const b=atob(EP.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);fd.append('photo',new Blob([a],{type:'image/jpeg'}),id+'.jpg');}
+    fetch(SALES.form,{method:'POST',headers:{Accept:'application/json'},body:fd}).then(r=>{if(!r.ok)throw 0;editDone(id,true,false);}).catch(()=>toast('送信できませんでした。時間をおいてもう一度お試しください（入力内容は保存されています）'));
+  }else if(SALES.mail){
+    location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);editDone(id,false,true);
+  }else toast('受付先が設定されていません（入力内容は保存されています）');
 }
 let AREA=null;
 function lookupZip(z){
@@ -1030,14 +1090,15 @@ function route(){
   app.innerHTML=jp?jinPage(jp):h==='a-uscr'?artUSCR():h==='column'?columns():COLS.some(c=>c.id===h)?COLS.find(c=>c.id===h).f():h==='plans'?plans():h==='apply'?apply():h==='terms'?terms():h==='tokusho'?tokusho():h==='edit'?edit():h==='search'?search():h==='area'?area():e?election(e):C[h]?cand(h):home();
   document.querySelectorAll('.hd nav a').forEach(a=>a.classList.toggle('on',a.dataset.n===(h==='column'||COLS.some(c=>c.id===h)?'column':['plans','apply','terms','tokusho'].includes(h)?'plans':['edit','search'].includes(h)?h:'home')));
   document.title=(jp?jp.n+'（'+(jp.kata||'陣営プラン')+'）':e?e.name:C[h]?C[h].n:h==='plans'?'掲載プラン':h==='apply'?'陣営プランのお申し込み':h==='terms'?'陣営プラン利用規約':h==='tokusho'?'特定商取引法に基づく表記':h==='edit'?'陣営ページの編集':h==='search'?'検索':h==='a-uscr'?'史上初の米中露首脳会談　「平和宣言」で何が決まった？':h==='column'?'コラム':COLS.some(c=>c.id===h)?COLS.find(c=>c.id===h).t:h==='area'&&AREA?AREA.pref+AREA.city+'の選挙':'投票日和')+'｜投票日和';
-  if(h==='edit')renderPrev();
+  if(h==='edit'){loadDraft();renderPrev();}
   watchVotes(e);
   window.scrollTo(0,0);closeD();
 }
 function closeD(){const d=$('#drawer');d.hidden=true;$('#mbtn').setAttribute('aria-expanded','false')}
 document.addEventListener('click',ev=>{
   const g=ev.target.closest('[data-go]');if(g){const t=document.getElementById(g.dataset.go);if(t)t.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
-  const s=ev.target.closest('#seg button');if(s){pv=s.dataset.p;route();}
+  const s=ev.target.closest('#seg button');if(s){saveDraft();pv=s.dataset.p;const y=scrollY;route();scrollTo(0,y);}
+  if(ev.target.closest('#ph-del')){EP='';saveDraft();$('#ph-del').hidden=true;renderPrev();toast('写真を削除しました');return;}
   if(ev.target.closest('#mbtn')){const d=$('#drawer');d.hidden=!d.hidden;$('#mbtn').setAttribute('aria-expanded',String(!d.hidden));return;}
   const to=ev.target.closest('[data-to]');if(to){ev.preventDefault();const go=()=>{const t=document.getElementById(to.dataset.to);if(t)t.scrollIntoView();};if((location.hash.slice(1)||'home')!=='home'){location.hash='home';setTimeout(go,50);}else{closeD();go();}return;}
   const m=ev.target.closest('[data-m]');if(m){calM=m.dataset.m;const y=scrollY;route();scrollTo(0,y);return;}
@@ -1045,15 +1106,16 @@ document.addEventListener('click',ev=>{
   const tb=ev.target.closest('[data-t]');if(tb){qt=tb.dataset.t;if(!location.hash.startsWith('#search'))q='';location.hash==='#search'?route():location.hash='search';return;}
   if(ev.target.closest('[data-art]'))toast('記事ページは次の段階で作成します');
 });
-document.addEventListener('input',ev=>{if(ev.target.closest('#ef'))renderPrev();});
+document.addEventListener('input',ev=>{if(ev.target.closest('#ef')){saveDraft();renderPrev();}});
+document.addEventListener('change',ev=>{if(ev.target.id==='f-photo'){readPhoto(ev.target.files[0]);ev.target.value='';}});
 document.addEventListener('change',ev=>{if(!ev.target.closest('#af'))return;if(ev.target.id==='a-tier'){AP.tier=ev.target.value;if(!SALES.stripe[AP.tier])AP.pay='inv';const keep=['a-n','a-area','a-st','a-who','a-mail','a-tel','a-memo'].map(i=>[i,$('#'+i).value]);const ok=$('#a-ok').checked,y=scrollY;route();scrollTo(0,y);keep.forEach(([i,x])=>$('#'+i).value=x);$('#a-ok').checked=ok;}else if(ev.target.name==='a-pay'){AP.pay=ev.target.value;}$('#a-sum').innerHTML=sumHtml();});
 document.addEventListener('submit',ev=>{ev.preventDefault();
   if(ev.target.id==='zipf'){const raw=$('#zip').value.trim();const v=raw.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,'');
     if(v.length===7){lookupZip(v);}else if(raw&&!/^[\d０-９\-ー－\s]+$/.test(raw)){q=raw;qt='';location.hash==='#search'?route():location.hash='search';}else{toast('郵便番号を7桁で入力してください（市区町村名でも探せます）');}}
   else if(ev.target.id==='sf'){q=$('#sq').value;route();}
   else if(ev.target.id==='af')sendApply();
-  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}toast('登録しました（プロトタイプのため実際には登録されません）');}
-  else toast('保存しました（プロトタイプのため実際には保存されません）');
+  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}const body=`郵便番号: ${z}\nメール: ${m}`,subj='【投票日和】無料会員登録';if(SALES.form){fetch(SALES.form,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({_subject:subj,email:m,zip:z,message:body})}).then(r=>{if(!r.ok)throw 0;toast('登録しました。選挙が近づいたらお知らせします');ev.target.reset();}).catch(()=>toast('登録できませんでした。時間をおいてもう一度お試しください'));}else if(SALES.mail){location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);toast('メールアプリが開いたら、そのまま送信してください');}}
+  else if(ev.target.id==='ef')sendEdit();
 });
 addEventListener('hashchange',route);
 loadVotes();

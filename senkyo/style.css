@@ -146,6 +146,8 @@ table{border-collapse:collapse;width:100%}
 .seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .seg button{min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 16px;font-weight:700}
 .seg button.on{background:var(--sky);color:#fff;border-color:var(--sky)}
+[hidden]{display:none!important}
+.phf{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.phf .av{width:90px;height:108px;object-fit:cover}.phf .btns{display:flex;gap:8px;flex-wrap:wrap}.phf .btn{min-height:44px;padding:0 14px;cursor:pointer}
 .pv{position:sticky;top:76px;border:1px solid var(--line);border-radius:16px;padding:0 16px;background:var(--card)}
 .ic{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--ink);padding:0}
 .ic:hover{background:var(--soft)}
