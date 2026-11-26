@@ -10,15 +10,15 @@
 import fs from 'node:fs';import path from 'node:path';import vm from 'node:vm';
 const dir=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const SITE='https://tohyobiyori.jp';
-const data=fs.readFileSync(path.join(dir,'data.js'),'utf8');
+const data=fs.readFileSync(path.join(dir,'data.js'),'utf8')+'\n'+(fs.existsSync(path.join(dir,'topics.js'))?fs.readFileSync(path.join(dir,'topics.js'),'utf8'):'');
 let html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
 const app=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(t=>t.includes('function route'));
 const el=()=>({innerHTML:'',textContent:'',hidden:true,classList:{add(){},remove(){},toggle(){}},setAttribute(){},dataset:{},value:'',scrollIntoView(){}});
 const out={};
 const ctx={document:{querySelector:el,querySelectorAll:()=>[],addEventListener(){},getElementById:el,title:''},location:{hash:''},addEventListener(){},window:{scrollTo(){}},scrollTo(){},matchMedia:()=>({matches:false}),MutationObserver:class{observe(){}},console,__out:out};
 vm.createContext(ctx);
-vm.runInContext(data+'\n'+app.trim().replace(/\}\s*$/,';Object.assign(__out,{E,election,ecard,when,fmt,distOf,days,UPDATED,DIST,DD});}'),ctx);
-const {E,election,ecard,when,fmt,distOf,days,UPDATED,DIST,DD}=out;
+vm.runInContext(data+'\n'+app.trim().replace(/\}\s*$/,';Object.assign(__out,{E,election,ecard,when,fmt,distOf,days,UPDATED,DIST,DD,TP_FEAT,TP_DAILY,TP_ARTS,dItem,dDate,artPage});}'),ctx);
+const {E,election,ecard,when,fmt,distOf,days,UPDATED,DIST,DD,TP_FEAT,TP_DAILY,TP_ARTS,dItem,dDate,artPage}=out;
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const today=new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
@@ -204,6 +204,27 @@ ${other.length?`<h2 style="font-size:22px;margin-top:24px">全国の選挙</h2>$
 <p class="src">最終更新 ${fmt(UPDATED)}。日程は変更されることがあります。最新の情報は各選挙管理委員会でご確認ください。</p></div>`;
 write('/senkyo/',page({title:'全国の選挙一覧（日程・候補者）｜投票日和',desc:`全国の知事選・都道府県議選・市区町村長選・市区町村議選の一覧（${list.length}件）。各選挙の投票日・告示日・定数・候補者を掲載しています。`,canon:SITE+'/senkyo/',body:idx,ld:crumbLd([['トップ','/'],['選挙一覧','/senkyo/']])}));
 
+// ニュース（/news/、/news/YYYY-MM-DD/）と特集・解説（/kiji/ID/）
+for(const d of ['news','kiji'])fs.rmSync(path.join(dir,d),{recursive:true,force:true});
+const strip=h=>h.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+const kurl=a=>`/kiji/${a.id.replace(/^k-/,'')}/`;
+const fixK=s=>fixLinks(s).replace(/href="\/#(k-[a-z0-9-]+)"/g,(m,id)=>{const a=TP_ARTS.find(x=>x.id===id);return a?`href="${kurl(a)}"`:m;});
+if(TP_DAILY.length){
+  const ni=[['トップ','/'],['政治・選挙ニュース','/news/']];
+  const day=g=>`<h2 style="font-size:22px;margin-top:28px"><a href="/news/${g.date}/">${g.date.slice(0,4)}年${dDate(g.date)}</a></h2><ul class="dnews">${g.items.map(x=>fixK(dItem(x))).join('')}</ul>`;
+  write('/news/',page({title:'政治・選挙ニュース（毎日更新）｜投票日和',desc:`国政・選挙・自治体の動きを毎朝まとめています。${TP_DAILY[0].items.slice(0,3).map(x=>x.t).join('／')}`,canon:SITE+'/news/',ld:crumbLd(ni),body:`<div class="wrap">${crumb(ni)}<h1>政治・選挙ニュース</h1><p>国政・選挙・自治体の動きを、毎朝、報道機関と公的機関の発表から選んで短くまとめています。特定の政党や候補者を支持・推薦するものではありません。</p>${TP_DAILY.slice(0,14).map(day).join('')}<p class="src">最終更新 ${fmt(TP_DAILY[0].date)}</p></div>`}));
+  sm.push([SITE+'/news/','0.9']);
+  for(const g of TP_DAILY){const u=`/news/${g.date}/`,it=[...ni,[`${g.date.slice(0,4)}年${dDate(g.date)}`,u]];
+    write(u,page({title:`${g.date.slice(0,4)}年${dDate(g.date)}の政治・選挙ニュース｜投票日和`,desc:g.items.map(x=>x.t).join('／').slice(0,150),canon:abs(u),ld:crumbLd(it),body:`<div class="wrap">${crumb(it)}<h1>${g.date.slice(0,4)}年${dDate(g.date)}の政治・選挙ニュース</h1><ul class="dnews">${g.items.map(x=>fixK(dItem(x))).join('')}</ul><p style="margin-top:20px"><a href="/news/">政治・選挙ニュースの一覧</a>　<a href="/">トップへ</a></p></div>`}));
+    sm.push([abs(u),'0.6']);}
+}
+for(const a of TP_ARTS){const u=kurl(a),it=[['トップ','/'],[a.kind==='コラム'?'コラム':'特集・解説',a.kind==='コラム'?'/#column':'/#kiji'],[a.t,u]];
+  write(u,page({title:`${a.t}｜投票日和`,desc:strip(a.lead).slice(0,150),canon:abs(u),ld:[crumbLd(it),{'@context':'https://schema.org','@type':'Article',headline:a.t,datePublished:a.d.replace(/\//g,'-'),author:{'@type':'Organization',name:'投票日和 編集部'},publisher:{'@type':'Organization',name:'投票日和'},image:OG}],body:fixK(artPage(a))}));
+  sm.push([abs(u),'0.7']);}
+
+// index.html の特集バー
+html=html.replace(/<a class="topnews" href="[^"]*">([\s\S]*?)<b>[\s\S]*?<\/b>/,(m,pre)=>`<a class="topnews" href="${esc(TP_FEAT.href)}">${pre}<b>${esc(TP_FEAT.bar)}</b>`);
+
 // index.html の都道府県リンク
 const nav=`<!--pref-links-->${prefNav()}<!--/pref-links-->`;
 html=/<!--pref-links-->[\s\S]*?<!--\/pref-links-->/.test(html)?html.replace(/<!--pref-links-->[\s\S]*?<!--\/pref-links-->/,nav):html.replace('</main>\n','</main>\n'+nav+'\n');
@@ -216,4 +237,4 @@ fs.writeFileSync(path.join(dir,'sitemap.xml'),`<?xml version="1.0" encoding="UTF
 ${urls.map(([l,p])=>`  <url><loc>${l}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>${p}</priority></url>`).join('\n')}
 </urlset>
 `);
-console.log(`選挙ページ ${list.length} 件／都道府県 ${prefs.length} 件／市区町村 ${Object.keys(byMuni).length} 件／sitemap ${urls.length} URL を作成しました`);
+console.log(`ニュース ${TP_DAILY.length} 日分・特集 ${TP_ARTS.length} 件／選挙ページ ${list.length} 件／都道府県 ${prefs.length} 件／市区町村 ${Object.keys(byMuni).length} 件／sitemap ${urls.length} URL を作成しました`);

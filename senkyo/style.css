@@ -194,6 +194,14 @@ table{border-collapse:collapse;width:100%}
 .topnews .tag{flex:none}
 .topnews span:last-child{margin-left:auto;flex:none;color:var(--sun)}
 .topnews:hover b{text-decoration:underline}
+.dnews{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.dn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;padding:14px 2px;border-bottom:1px solid var(--line)}
+.dn>.tag{align-self:start;margin-top:3px}
+.dn h3{font-size:17px;margin:0 0 4px;line-height:1.45}
+.dn h3 a{color:var(--ink)}
+.dn p{margin:0 0 4px;font-size:15px}
+.dn .meta{font-size:13px}
+.dday{font-size:20px;margin:28px 0 8px}
 .news{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .art{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--card);text-align:left;padding:0;color:var(--ink);cursor:pointer}
 .art svg{display:block;width:100%;height:auto}
