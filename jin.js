@@ -37,7 +37,7 @@ const JIN=[
  "tier": "pref",
  "from": "2026-11-27",
  "until": "2027-05-26",
- "photo": "",
+ "photo": "https://tohyobiyori.jp/img/ishioka-inoue-kouhei.jpg?v=1",
  "copy": "今こそ石岡の思いを県政へ！",
  "career": [
   "1985年生まれ、41歳。石岡市総社生まれ・石岡育ち",
