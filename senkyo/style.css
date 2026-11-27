@@ -162,6 +162,15 @@ table{border-collapse:collapse;width:100%}
 .cal .dt{font:900 26px/1 "Zen Maru Gothic";color:var(--sky);text-align:center;white-space:nowrap}
 .cal .dt small{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-top:4px}
 .cal strong{display:block;font-size:17px}
+.nextsec .nexthead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.nextsec .nexthead h2{font-size:26px;margin:0}
+.nextsec .sec-h h3{font-size:19px;margin:0}
+.nextsec .nexttwo{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,2.5vw,24px)}
+.nextsec .nextfeat{display:grid;gap:12px}
+.nextsec .nextfeat .ecard{padding:14px}
+.nextsec .nextfeat .ecard h3{font-size:17px}
+.nextsub{margin:10px 0 0;font-weight:700}
+@media (max-width:760px){.nextsec .nexttwo{grid-template-columns:1fr;gap:24px}.nextsec .nexthead{flex-wrap:wrap;gap:6px}}
 .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start}
 .reg{display:grid;gap:14px}
 .reg h3{font-size:15px;color:var(--sub);margin-bottom:6px}

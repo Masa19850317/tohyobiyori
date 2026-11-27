@@ -182,6 +182,15 @@ table{border-collapse:collapse;width:100%}
 .cal .dt{font:900 26px/1 "Zen Maru Gothic";color:var(--sky);text-align:center;white-space:nowrap}
 .cal .dt small{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-top:4px}
 .cal strong{display:block;font-size:17px}
+.nextsec .nexthead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.nextsec .nexthead h2{font-size:26px;margin:0}
+.nextsec .sec-h h3{font-size:19px;margin:0}
+.nextsec .nexttwo{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,2.5vw,24px)}
+.nextsec .nextfeat{display:grid;gap:12px}
+.nextsec .nextfeat .ecard{padding:14px}
+.nextsec .nextfeat .ecard h3{font-size:17px}
+.nextsub{margin:10px 0 0;font-weight:700}
+@media (max-width:760px){.nextsec .nexttwo{grid-template-columns:1fr;gap:24px}.nextsec .nexthead{flex-wrap:wrap;gap:6px}}
 .two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start}
 .reg{display:grid;gap:14px}
 .reg h3{font-size:15px;color:var(--sub);margin-bottom:6px}
@@ -411,6 +420,31 @@ function resultsBlock(){
    <div class="grid">${rs.map(rcard).join('')}</div>
    <p class="src">出典：各選挙管理委員会の開票結果、報道各社の開票速報（各選挙のページに記載）。当選確実は報道による速報です。</p></section>`;
 }
+/* 選挙カレンダーの1行（トップのカレンダー・「次の選挙」で共通） */
+function calRow(e){const dt=new Date(e.date+'T00:00:00+09:00'),wk='日月火水木金土';return `<a href="#${e.id}"><span class="dt">${e.ap?`${+e.date.slice(5,7)}月<small>ごろ</small>`:`${+e.date.slice(5,7)}/${+e.date.slice(8)}<small>${wk[dt.getDay()]}曜</small>`}</span><span><strong>${esc(e.name)}${e.dist?' '+esc(e.dist):''}</strong><span class="meta">${esc(e.pref)}｜${esc(e.type)}｜告示 ${e.kokuji?`${+e.kokuji.slice(5,7)}/${+e.kokuji.slice(8)}`:'未定'}${e.mk?'（見込み）':''}${e.count?`｜${e.count}件`:''}</span></span><span class="tag ${!e.ap&&days(e.date)<=30?'hot':''}">${e.ap?esc(e.ap):days(e.date)<=0?'きょう投票':`あと${days(e.date)}日`}</span></a>`;}
+/* 開票結果のすぐ下：「次の選挙」（直近の投票日の選挙）と「注目の選挙」 */
+const tRank=e=>{const i=TORD.indexOf(e.type);return i<0?9:i};
+function nextList(up,ex,n){const ds=[...new Set(up.filter(e=>!e.ap&&!ex.has(e.id)).map(e=>e.date))].slice(0,2);
+  return up.filter(e=>ds.includes(e.date)&&!ex.has(e.id)).sort((a,b)=>a.date.localeCompare(b.date)||tRank(a)-tRank(b)||(b.cands.length-a.cands.length)).slice(0,n);}
+function nextBlock(up,opt={}){
+  const ex=new Set(opt.ex||[]),pref=opt.pref;
+  const feat=FEAT.map(n=>up.find(e=>e.name===n)).filter(e=>e&&!ex.has(e.id));
+  feat.forEach(e=>ex.add(e.id));
+  const loc=pref?up.filter(e=>e.pref===pref&&!ex.has(e.id)).slice(0,4):[];loc.forEach(e=>ex.add(e.id));
+  const nx=nextList(up,ex,opt.n||8);
+  if(!nx.length&&!feat.length&&!loc.length)return '';
+  const nd=nx[0]&&nx[0].date,cnt=nd?up.filter(e=>e.date===nd).length:0;
+  return `<section class="${opt.inner?'':'wrap '}band nextsec" id="next"${opt.inner?'':' style="padding-top:0"'}>
+   <div class="nexthead"><span class="tag hot">このあとの選挙</span><h2>次の選挙・注目の選挙</h2></div>
+   <div class="two nexttwo">
+    <div><div class="sec-h"><h3>次の選挙</h3>${nd?`<span class="meta">${fmt(nd).slice(5)}投票は${cnt}件${cnt>nx.filter(e=>e.date===nd).length?'（主な選挙）':''}</span>`:''}</div>
+     ${loc.length?`<p class="meta nextsub">${esc(pref)}のこのあとの選挙</p><div class="cal">${loc.map(calRow).join('')}</div><p class="meta nextsub">全国の直近の選挙</p>`:''}
+     <div class="cal">${nx.map(calRow).join('')||'<p class="meta">予定されている選挙はありません。</p>'}</div>
+     <p style="margin:12px 0 0"><a href="#search">日程から選挙をさがす</a></p></div>
+    <div><div class="sec-h"><h3>注目の選挙</h3><a href="#search">すべて見る</a></div>
+     <div class="nextfeat">${feat.map(ecard).join('')||'<p class="meta">いま掲載している注目の選挙はありません。</p>'}</div></div>
+   </div></section>`;
+}
 function home(){
   const up=E.filter(e=>!e.done&&!e.smp&&e.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date)),next=up[0],d=days(next.date),nx=up.filter(e=>e.date===next.date);
   const lim=(new Date().getFullYear()+1)+'-12';const months=[...new Set(up.map(e=>e.date.slice(0,7)<=lim?e.date.slice(0,7):e.date.slice(0,4)))];if(!months.includes(calM))calM=months[0];
@@ -436,16 +470,14 @@ function home(){
    <div><b>${up.reduce((a,e)=>a+(e.count||1),0).toLocaleString()}件</b><span>${LASTY()}年末までの選挙</span></div></div></div>
 
   ${resultsBlock()}
+  ${nextBlock(up)}
   ${pickBlock()}
   ${todayBlock()}
-  <section class="wrap band"><div class="sec-h"><h2>注目の選挙</h2><a href="#search">すべての選挙を見る</a></div>
-   <div class="grid">${FEAT.map(n=>up.find(e=>e.name===n)).filter(Boolean).map(ecard).join('')}</div>
-</section>
 
   <section class="wrap band" style="padding-top:0"><div class="two">
    <div id="cal"><div class="sec-h"><h2>選挙カレンダー</h2></div>
     <div class="cal-tabs">${months.map(m=>`<button data-m="${m}" class="${m===calM?'on':''}">${m.length===4?m+'年':m.slice(2,4)+'年'+(+m.slice(5))+'月'}（${up.filter(e=>e.date.startsWith(m)).length}）</button>`).join('')}</div>
-    <div class="cal">${up.filter(e=>e.date.startsWith(calM)).map(e=>{const dt=new Date(e.date+'T00:00:00+09:00');return `<a href="#${e.id}"><span class="dt">${e.ap?`${+e.date.slice(5,7)}月<small>ごろ</small>`:`${+e.date.slice(5,7)}/${+e.date.slice(8)}<small>${wk[dt.getDay()]}曜</small>`}</span><span><strong>${esc(e.name)}${e.dist?' '+esc(e.dist):''}</strong><span class="meta">${esc(e.pref)}｜${esc(e.type)}｜告示 ${e.kokuji?`${+e.kokuji.slice(5,7)}/${+e.kokuji.slice(8)}`:'未定'}${e.mk?'（見込み）':''}${e.count?`｜${e.count}件`:''}</span></span><span class="tag ${!e.ap&&days(e.date)<=30?'hot':''}">${e.ap?esc(e.ap):`あと${days(e.date)}日`}</span></a>`}).join('')}</div></div>
+    <div class="cal">${up.filter(e=>e.date.startsWith(calM)).map(calRow).join('')}</div></div>
    <aside>${ad('広告 300×250')}</aside></div></section>
 
   <section class="wrap band" id="pref" style="padding-top:0"><div class="sec-h"><h2>地域から探す</h2></div>
@@ -532,7 +564,7 @@ function election(e){
   ${!e.cands.length?ad():''}
   <h2 style="font-size:22px;margin-top:20px;${e.cands.length?'':'display:none'}">${e.done?'開票結果':'候補者'}<span class="meta" style="font-size:13px;font-weight:400">　届出順（全プラン共通）</span></h2>
   ${e.cands.map((id,i)=>candRow(id,e,i)).join('')}
-  
+  ${e.done||e.date<=jstToday()?nextBlock(E.filter(x=>!x.done&&!x.smp&&x.date>=jstToday()).sort((a,b)=>a.date.localeCompare(b.date)),{ex:[e.id],pref:e.pref,inner:true}):''}
   <p class="src">出典：${esc(e.src)}／最終更新 ${fmt(UPDATED)}（運営）。日程は変更されることがあります。最新の情報は各選挙管理委員会でご確認ください。</p></div>`;
 }
 function jinPage(j){
