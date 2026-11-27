@@ -291,12 +291,15 @@ footer a{color:#fff}
 const P={free:'フリー',pre:'陣営プラン'};
 // ===== 有料掲載の設定（運営が記入する） =====
 // open: 受付を始めるときに true。false の間は申込フォームが「受付準備中」になり送信できません。
-// form: 申込内容の送信先（Formspree などの受付URL）。空のときはメール（mail）に申込内容を下書きします。
+// form: 受付サーバー（apps-script/Code.gs を Google Apps Script にデプロイした「ウェブアプリのURL」）。
+//       原稿・写真・申込・会員登録をここへ送り、契約済みの陣営は本人のメール確認だけで自動公開されます。
+//       空のときはメール（mail）に下書きします（この場合、写真は届きません）。
 // stripe: 区分ごとの Stripe 支払いリンク（初期費用＋月額サブスクを1つのリンクに入れる）。空の区分はカード払いを選べません。
 // seller: 特定商取引法に基づく表記。open を true にする前に必ず記入します。
 const SALES={open:true,form:'',mail:'mob.record23@gmail.com',
  stripe:{kokusei:'',shucho:'',pref:'',seirei:'',tokubetsu:'',chukaku:'',shi:'',chouson:''},
  seller:{name:'投票日和運営事務局',rep:'上野真仁',addr:'〒315-0014 茨城県石岡市国府1-2-2',tel:'090-6040-1985',mail:'mob.record23@gmail.com',hours:'平日10時〜18時'}};
+const postForm=o=>fetch(SALES.form,{method:'POST',body:JSON.stringify(o)}).then(r=>r.json()).then(j=>{if(!j||!j.ok)throw j;return j});
 const INIT=25000; // 初期費用（税抜）
 const TIERS=[['kokusei','国政（衆議院・参議院）',11300],['shucho','首長（知事・市区町村長）',9000],['pref','都道府県議会',9000],['seirei','政令指定都市の市議会',9000],['tokubetsu','東京23区の区議会',6000],['chukaku','中核市の市議会',6000],['shi','一般市の市議会',4800],['chouson','町議会・村議会',3300]];
 const yen=n=>n.toLocaleString('ja-JP')+'円',tax=n=>Math.round(n*1.1);
@@ -524,7 +527,7 @@ function candRow(id,e,i){
    `<div class="freeinfo"><a href="#${id}">基本情報を見る</a><span>運営調べ・陣営未登録</span></div>`}</div>${i===1?ad('広告（候補者一覧の2人目のあと）'):''}`;
 }
 function candRows(d,e){
-  return vStat(e,d)+d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${av({n:c.nm,col:'#8a94a6'})}<div><div class="nmrow"><h3 style="font-size:19px">${esc(c.nm)}</h3>${vCell(e,d,c.nm)}</div><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}${(j=>j?`${j.copy?`<div class="bub" style="margin-top:8px">${esc(j.copy)}</div>`:''}<a class="more" href="#j-${esc(j.id)}">この候補者の政策・活動を見る</a>`:'')(jinOf(c.nm,e.name))}</div></div>`).join('')
+  return vStat(e,d)+d.c.map(c=>`<div class="cand" style="grid-template-columns:56px minmax(0,1fr);padding:12px 0">${(j=>j&&/^https:\/\//.test(j.photo)?`<img class="av" src="${esc(j.photo)}" alt="${esc(c.nm)}の写真" loading="lazy" style="object-fit:cover">`:av({n:c.nm,col:'#8a94a6'}))(jinOf(c.nm,e.name))}<div><div class="nmrow"><h3 style="font-size:19px">${esc(c.nm)}</h3>${vCell(e,d,c.nm)}</div><div class="row"><span class="tag gray">${esc(c.p)}</span><span>${c.age?c.age+'歳　':''}${esc(c.st)}</span><span class="tag ${d.off?'hot':''}">${d.off?'候補者':'立候補予定者'}</span></div>${c.nt?`<div class="row meta">${esc(c.nt)}</div>`:''}${(j=>j?`${j.copy?`<div class="bub" style="margin-top:8px">${esc(j.copy)}</div>`:''}<a class="more" href="#j-${esc(j.id)}">この候補者の政策・活動を見る</a>`:'')(jinOf(c.nm,e.name))}</div></div>`).join('')
    +`<p class="meta">${d.off?'届出順。選挙管理委員会への立候補届出に基づきます。':'立候補予定者（告示前・報道に基づく）。正式な候補者は告示日の届出後に更新します。'}</p><p class="src">出典：${esc(d.src)}</p>`;
 }
 function distBlock(e){
@@ -818,8 +821,8 @@ function sendApply(){
   const d={id,tier:AP.tier,区分:t[1],月額税込:tax(t[2]),初期費用税込:tax(INIT),pay:AP.pay,支払方法:AP.pay==='card'?'カード（毎月）':'請求書（6か月分一括）',name:v('a-n'),area:v('a-area'),st:v('a-st'),who:v('a-who'),mail:v('a-mail'),tel:v('a-tel'),memo:v('a-memo'),at:now.toISOString().slice(0,16).replace('T',' ')};
   const body=`申込番号: ${d.id}\n区分: ${d.区分}（月額${yen(d.月額税込)}・初期費用${yen(d.初期費用税込)}）\n支払方法: ${d.支払方法}\nお名前: ${d.name}\n自治体・選挙区: ${d.area}\n立場: ${d.st}\n申込者: ${d.who||'本人'}\nメール: ${d.mail}\n電話: ${d.tel}\n連絡事項: ${d.memo}\n申込日時: ${d.at}`;
   if(SALES.form){toast('送信しています…');
-    fetch(SALES.form,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({...d,_subject:'【投票日和】陣営プラン申込 '+d.id,message:body})})
-     .then(r=>{if(!r.ok)throw 0;applyDone(d,true)}).catch(()=>toast('送信できませんでした。時間をおいてもう一度お試しください'));}
+    postForm({...d,type:'apply',message:body})
+     .then(()=>applyDone(d,true)).catch(e=>toast(e&&e.msg||'送信できませんでした。時間をおいてもう一度お試しください'));}
   else if(SALES.mail){location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent('【投票日和】陣営プラン申込 '+d.id)+'&body='+encodeURIComponent(body);applyDone(d,false);}
   else toast('受付先が設定されていません');
 }
@@ -853,7 +856,7 @@ let pv='pre',EP='';
 const EF=['f-n','f-kata','f-area','f-mail','f-tel','f-copy','f-pol','f-act','f-yt'];
 function edit(){
   const dis=k=>pv==='free'||(k==='pre'&&pv!=='pre');
-  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">入力した内容と写真は、この端末に自動で保存されます。「保存して送信」を押すと運営に届き、本人確認と内容の確認のあと公開します（通常3営業日以内）。</p>
+  return `<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">陣営ページの編集</h1><p class="meta">入力した内容と写真は、この端末に自動で保存されます。「保存して送信」を押すと運営に届きます。はじめての方は運営が本人確認をしてから公開します。契約済みの陣営は、登録メールに届く確認リンクを押すと数分で反映されます（告示日から投票日までは変更できません）。</p>
   <div class="seg" id="seg">${Object.entries(P).map(([k,v])=>`<button type="button" data-p="${k}" class="${k===pv?'on':''}">${v}</button>`).join('')}</div>
   <div class="edit"><form id="ef">
    <div class="fld"><label for="f-n">氏名（告示どおり）</label><input id="f-n" required autocomplete="name" placeholder="例：選挙管理委員会への届出どおりの氏名"></div>
@@ -861,8 +864,8 @@ function edit(){
    <div class="fld"><label for="f-area">自治体・選挙</label><input id="f-area" placeholder="例：神奈川県大磯町／大磯町議会議員選挙"></div>
    <div class="fld"><label>顔写真（1枚）</label><div class="phf"><div id="ph"></div><div><div class="btns"><label class="btn ghost" for="f-photo">写真を選ぶ</label><button type="button" class="btn ghost" id="ph-del" ${EP?'':'hidden'}>削除</button></div><input type="file" id="f-photo" accept="image/*" hidden><p class="meta" style="margin:6px 0 0">写真は横5：縦6の大きさに、中央で切り抜きます。ご本人の写真に限ります。</p></div></div></div>
    <div class="fld"><label for="f-copy">キャッチコピー（40字まで）${dis()?'<span class="lock">陣営プラン</span>':''}</label><input id="f-copy" maxlength="40" placeholder="例：くらしの声を、議会へ。" ${dis()?'disabled':''}></div>
-   <div class="fld"><label for="f-pol">政策・メッセージ ${dis()?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-pol" ${dis()?'disabled':''} placeholder="政策や有権者へのメッセージ"></textarea></div>
-   <div class="fld"><label for="f-act">活動実績 ${dis('pre')?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-act" ${dis('pre')?'disabled':''} placeholder="これまでの活動"></textarea></div>
+   <div class="fld"><label for="f-pol">政策・メッセージ ${dis()?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-pol" ${dis()?'disabled':''} placeholder="政策や有権者へのメッセージ"></textarea><p class="meta" style="margin:6px 0 0">「1. 見出し」の行のあとに説明を書くと、政策ごとに分けて表示します。番号のない文はメッセージになります。</p></div>
+   <div class="fld"><label for="f-act">活動実績 ${dis('pre')?'<span class="lock">陣営プラン</span>':''}</label><textarea id="f-act" ${dis('pre')?'disabled':''} placeholder="これまでの活動"></textarea><p class="meta" style="margin:6px 0 0">SNSは最後に【SNS】の行を置き、その下に「Instagram https://…」のように1行ずつ書くとボタンになります。</p></div>
    <div class="fld"><label for="f-yt">YouTube動画のURL ${dis('pre')?'<span class="lock">陣営プラン</span>':''}</label><input id="f-yt" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." ${dis('pre')?'disabled':''}></div>
    <div class="fld"><label for="f-mail">連絡先メールアドレス</label><input id="f-mail" type="email" required autocomplete="email"></div>
    <div class="fld"><label for="f-tel">電話番号（本人確認でお電話します）</label><input id="f-tel" type="tel" autocomplete="tel"></div>
@@ -901,12 +904,12 @@ function renderPrev(){
   p.innerHTML=`<div class="cand" style="border:0">${photoTag(c)}<div><h3>${esc(c.n)}</h3><div class="row meta">${esc(c.kata)}</div></div>
    ${paid&&c.copy?`<div class="bub">${esc(c.copy)}</div><span class="more" style="color:var(--sky)">この候補者の政策・活動を見る</span>`:`<div class="freeinfo"><span>基本情報を見る</span><span>運営調べ・陣営未登録</span></div>`}</div>`;
 }
-function editDone(id,ok,mailed){
+function editDone(id,ok,mailed,msg){
   $('#app').innerHTML=`<div class="wrap band"><h1 style="font-size:clamp(26px,4vw,36px)">${ok?'送信しました':'送信の準備ができました'}</h1>
   <p>受付番号：<b>${id}</b></p>
   ${mailed?`<div class="notice"><strong>メールアプリが開いたら、そのまま送信してください。</strong>送信されるまで受付は完了しません。${EP?'<br>写真はメールに添付してお送りください（下のボタンで切り抜き済みの写真を保存できます）。':''}</div>`:''}
   ${mailed&&EP?`<p><a class="btn ghost" href="${EP}" download="${id}.jpg">写真を保存する</a></p>`:''}
-  <p>運営が本人確認と内容の確認をしてから公開します（通常3営業日以内）。入力内容はこの端末に保存されているので、あとから直して送り直せます。</p>
+  <p>${msg?esc(msg):'運営が本人確認と内容の確認をしてから公開します（通常3営業日以内）。'}入力内容はこの端末に保存されているので、あとから直して送り直せます。</p>
   <p class="meta" style="margin-top:20px"><a href="#edit">編集画面に戻る</a></p></div>`;
   window.scrollTo(0,0);
 }
@@ -921,9 +924,8 @@ function sendEdit(){
   const subj='【投票日和】陣営ページ原稿 '+id+' '+v('f-n');
   if(SALES.form){
     toast('送信しています…');
-    const fd=new FormData();fd.append('_subject',subj);fd.append('email',v('f-mail'));fd.append('message',body);
-    if(EP){const b=atob(EP.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);fd.append('photo',new Blob([a],{type:'image/jpeg'}),id+'.jpg');}
-    fetch(SALES.form,{method:'POST',headers:{Accept:'application/json'},body:fd}).then(r=>{if(!r.ok)throw 0;editDone(id,true,false);}).catch(()=>toast('送信できませんでした。時間をおいてもう一度お試しください（入力内容は保存されています）'));
+    postForm({type:'edit',id,plan:pv,n:v('f-n'),kata:v('f-kata'),area:v('f-area'),mail:v('f-mail'),tel:v('f-tel'),copy:paid?v('f-copy'):'',pol:paid?v('f-pol'):'',act:pre?v('f-act'):'',yt:pre?v('f-yt'):'',photo:EP})
+     .then(j=>editDone(id,true,false,j.msg)).catch(e=>toast(e&&e.msg||'送信できませんでした。時間をおいてもう一度お試しください（入力内容は保存されています）'));
   }else if(SALES.mail){
     location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);editDone(id,false,true);
   }else toast('受付先が設定されていません（入力内容は保存されています）');
@@ -1191,7 +1193,7 @@ document.addEventListener('submit',ev=>{ev.preventDefault();
     if(v.length===7){lookupZip(v);}else if(raw&&!/^[\d０-９\-ー－\s]+$/.test(raw)){q=raw;qt='';location.hash==='#search'?route():location.hash='search';}else{toast('郵便番号を7桁で入力してください（市区町村名でも探せます）');}}
   else if(ev.target.id==='sf'){q=$('#sq').value;route();}
   else if(ev.target.id==='af')sendApply();
-  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}const body=`郵便番号: ${z}\nメール: ${m}`,subj='【投票日和】無料会員登録';if(SALES.form){fetch(SALES.form,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({_subject:subj,email:m,zip:z,message:body})}).then(r=>{if(!r.ok)throw 0;toast('登録しました。選挙が近づいたらお知らせします');ev.target.reset();}).catch(()=>toast('登録できませんでした。時間をおいてもう一度お試しください'));}else if(SALES.mail){location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);toast('メールアプリが開いたら、そのまま送信してください');}}
+  else if(ev.target.id==='joinf'){const z=$('#j-zip').value.replace(/\D/g,''),m=$('#j-mail').value;if(z.length!==7||!m.includes('@')){toast('郵便番号7桁とメールアドレスを入力してください');return;}const body=`郵便番号: ${z}\nメール: ${m}`,subj='【投票日和】無料会員登録';if(SALES.form){postForm({type:'join',email:m,zip:z}).then(()=>{toast('登録しました。選挙が近づいたらお知らせします');ev.target.reset();}).catch(()=>toast('登録できませんでした。時間をおいてもう一度お試しください'));}else if(SALES.mail){location.href='mailto:'+SALES.mail+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);toast('メールアプリが開いたら、そのまま送信してください');}}
   else if(ev.target.id==='ef')sendEdit();
 });
 addEventListener('hashchange',route);
